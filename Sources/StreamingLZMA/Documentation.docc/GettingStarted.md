@@ -29,7 +29,9 @@ Then add it to your target:
 
 ### System Requirements
 
-StreamingLZMA requires the liblzma library. Install it for your platform:
+StreamingLZMA uses Apple's built-in Compression framework and has no external dependencies. It works on all Apple platforms (macOS, iOS, tvOS, watchOS, visionOS).
+
+For XZ container format support, add the `StreamingLZMAXZ` target instead, which requires the system `liblzma` library:
 
 **macOS:**
 ```bash
@@ -54,18 +56,6 @@ let compressed = try LZMACompressor.compress(originalData)
 
 // Decompress data
 let decompressed = try LZMADecompressor.decompress(compressed)
-```
-
-## XZ Format
-
-For better compatibility and integrity checking, use the XZ container format:
-
-```swift
-// Compress with XZ format
-let compressed = try XZCompressor.compress(originalData)
-
-// Decompress XZ data
-let decompressed = try XZDecompressor.decompress(compressed)
 ```
 
 ## Streaming Compression
@@ -119,12 +109,6 @@ let compressor = try LZMACompressor(preset: .preset9)
 
 // Use fast compression (faster but larger)
 let fastCompressor = try LZMACompressor(preset: .preset1)
-```
-
-For XZ format, specify integrity check type:
-
-```swift
-let compressor = try XZCompressor(preset: .preset6, check: .sha256)
 ```
 
 ## Error Handling

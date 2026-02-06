@@ -18,9 +18,17 @@ let package = Package(
       name: "StreamingLZMA",
       targets: ["StreamingLZMA"]
     ),
+    .library(
+      name: "StreamingLZMAXZ",
+      targets: ["StreamingLZMAXZ"]
+    ),
     .executable(
       name: "lzma-tool",
       targets: ["lzma-tool"]
+    ),
+    .executable(
+      name: "xz-tool",
+      targets: ["xz-tool"]
     )
   ],
   dependencies: [
@@ -35,6 +43,12 @@ let package = Package(
     ),
     .target(
       name: "StreamingLZMA",
+      resources: [
+        .process("Resources")
+      ]
+    ),
+    .target(
+      name: "StreamingLZMAXZ",
       dependencies: ["Clzma"],
       resources: [
         .process("Resources")
@@ -47,12 +61,23 @@ let package = Package(
         .product(name: "ArgumentParser", package: "swift-argument-parser")
       ]
     ),
+    .executableTarget(
+      name: "xz-tool",
+      dependencies: [
+        "StreamingLZMAXZ",
+        .product(name: "ArgumentParser", package: "swift-argument-parser")
+      ]
+    ),
     .testTarget(
       name: "StreamingLZMATests",
       dependencies: ["StreamingLZMA"],
       resources: [
         .copy("Fixtures")
       ]
+    ),
+    .testTarget(
+      name: "StreamingLZMAXZTests",
+      dependencies: ["StreamingLZMAXZ"]
     )
   ]
 )

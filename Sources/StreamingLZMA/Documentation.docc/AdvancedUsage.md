@@ -116,30 +116,6 @@ let optimalChunkSize = 64 * 1024  // 64 KB
 let buffer = UnsafeMutableRawBufferPointer.allocate(byteCount: optimalChunkSize, alignment: 1)
 ```
 
-## XZ vs LZMA
-
-Choose the appropriate format for your needs:
-
-### Raw LZMA
-- Smaller overhead
-- No integrity checking
-- Requires external framing for streaming
-- Best for: embedded systems, custom protocols
-
-### XZ Container
-- Built-in integrity checks (CRC32, CRC64, SHA-256)
-- Supports concatenation
-- Self-delimiting streams
-- Best for: file archives, data interchange
-
-```swift
-// Use SHA-256 for critical data
-let xz = try XZCompressor(preset: .preset6, check: .sha256)
-
-// Use CRC64 for general files (faster)
-let xzFast = try XZCompressor(preset: .preset6, check: .crc64)
-```
-
 ## Error Recovery
 
 ### Handling Corrupted Data

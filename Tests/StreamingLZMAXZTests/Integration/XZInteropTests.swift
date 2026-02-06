@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import StreamingLZMA
+@testable import StreamingLZMAXZ
 
 // swiftlint:disable legacy_objc_type
 // This file tests interoperability with NSData compression methods,

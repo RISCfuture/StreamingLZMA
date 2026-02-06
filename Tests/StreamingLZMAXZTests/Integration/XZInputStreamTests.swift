@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import StreamingLZMA
+@testable import StreamingLZMAXZ
 
 @Suite("XZ InputStream Tests")
 struct XZInputStreamTests {
