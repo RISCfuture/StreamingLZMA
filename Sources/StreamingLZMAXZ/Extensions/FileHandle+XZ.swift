@@ -18,6 +18,8 @@ extension FileHandle {
     progress: ((Int64) -> Void)? = nil
   ) throws(XZError) {
     let bufferSize = configuration.bufferSize.bytes
+    let srcFD = self.fileDescriptor,
+      dstFD = destination.fileDescriptor
 
     // Initialize compression stream
     var stream = lzma_stream()
@@ -45,25 +47,19 @@ extension FileHandle {
 
     // Process input in chunks
     while true {
-      let chunk: Data
-      do {
-        chunk = try _xzReadData(ofLength: bufferSize)
-      } catch {
-        throw XZError.internalError("Failed to read from source: \(error)")
+      let bytesRead = Darwin.read(srcFD, sourceBuffer, bufferSize)
+      guard bytesRead >= 0 else {
+        throw XZError.internalError(
+          "Failed to read from source: \(String(cString: strerror(errno)))"
+        )
       }
+      if bytesRead == 0 { break }
 
-      if chunk.isEmpty {
-        break
-      }
-
-      totalBytesRead += Int64(chunk.count)
+      totalBytesRead += Int64(bytesRead)
       progress?(totalBytesRead)
 
-      // Copy to our buffer
-      chunk.copyBytes(to: sourceBuffer, count: chunk.count)
-
       stream.next_in = UnsafePointer(sourceBuffer)
-      stream.avail_in = chunk.count
+      stream.avail_in = bytesRead
       stream.next_out = destinationBuffer
       stream.avail_out = bufferSize
 
@@ -72,12 +68,7 @@ extension FileHandle {
 
         let outputSize = bufferSize - stream.avail_out
         if outputSize > 0 {
-          let outputData = Data(bytes: destinationBuffer, count: outputSize)
-          do {
-            try destination.write(contentsOf: outputData)
-          } catch {
-            throw XZError.internalError("Failed to write: \(error)")
-          }
+          try Self._xzWriteAll(dstFD, destinationBuffer, outputSize)
         }
 
         if ret == LZMA_MEM_ERROR {
@@ -102,12 +93,7 @@ extension FileHandle {
 
       let outputSize = bufferSize - stream.avail_out
       if outputSize > 0 {
-        let outputData = Data(bytes: destinationBuffer, count: outputSize)
-        do {
-          try destination.write(contentsOf: outputData)
-        } catch {
-          throw XZError.internalError("Failed to write final data: \(error)")
-        }
+        try Self._xzWriteAll(dstFD, destinationBuffer, outputSize)
       }
 
       if ret == LZMA_STREAM_END {
@@ -138,6 +124,8 @@ extension FileHandle {
     progress: ((Int64) -> Void)? = nil
   ) throws(XZError) {
     let bufferSize = configuration.bufferSize.bytes
+    let srcFD = self.fileDescriptor,
+      dstFD = destination.fileDescriptor
 
     // Initialize decompression stream
     var stream = lzma_stream()
@@ -161,25 +149,19 @@ extension FileHandle {
 
     // Process input in chunks
     while true {
-      let chunk: Data
-      do {
-        chunk = try _xzReadData(ofLength: bufferSize)
-      } catch {
-        throw XZError.internalError("Failed to read from source: \(error)")
+      let bytesRead = Darwin.read(srcFD, sourceBuffer, bufferSize)
+      guard bytesRead >= 0 else {
+        throw XZError.internalError(
+          "Failed to read from source: \(String(cString: strerror(errno)))"
+        )
       }
+      if bytesRead == 0 { break }
 
-      if chunk.isEmpty {
-        break
-      }
-
-      totalBytesRead += Int64(chunk.count)
+      totalBytesRead += Int64(bytesRead)
       progress?(totalBytesRead)
 
-      // Copy to our buffer
-      chunk.copyBytes(to: sourceBuffer, count: chunk.count)
-
       stream.next_in = UnsafePointer(sourceBuffer)
-      stream.avail_in = chunk.count
+      stream.avail_in = bytesRead
       stream.next_out = destinationBuffer
       stream.avail_out = bufferSize
 
@@ -188,12 +170,7 @@ extension FileHandle {
 
         let outputSize = bufferSize - stream.avail_out
         if outputSize > 0 {
-          let outputData = Data(bytes: destinationBuffer, count: outputSize)
-          do {
-            try destination.write(contentsOf: outputData)
-          } catch {
-            throw XZError.internalError("Failed to write: \(error)")
-          }
+          try Self._xzWriteAll(dstFD, destinationBuffer, outputSize)
         }
 
         if ret == LZMA_MEM_ERROR {
@@ -226,12 +203,7 @@ extension FileHandle {
 
       let outputSize = bufferSize - stream.avail_out
       if outputSize > 0 {
-        let outputData = Data(bytes: destinationBuffer, count: outputSize)
-        do {
-          try destination.write(contentsOf: outputData)
-        } catch {
-          throw XZError.internalError("Failed to write final data: \(error)")
-        }
+        try Self._xzWriteAll(dstFD, destinationBuffer, outputSize)
       }
 
       if ret == LZMA_STREAM_END {
@@ -259,6 +231,27 @@ extension FileHandle {
       return try read(upToCount: length) ?? Data()
     } else {
       return readData(ofLength: length)
+    }
+  }
+
+  /// Writes all bytes from a buffer to a file descriptor, retrying on partial writes.
+  ///
+  /// Uses `Darwin.write` instead of `FileHandle.write(contentsOf:)` to avoid creating
+  /// autoreleased `NSData` objects that accumulate in tight streaming loops.
+  private static func _xzWriteAll(
+    _ fd: Int32,
+    _ buffer: UnsafePointer<UInt8>,
+    _ count: Int
+  ) throws(XZError) {
+    var totalWritten = 0
+    while totalWritten < count {
+      let n = Darwin.write(fd, buffer + totalWritten, count - totalWritten)
+      guard n > 0 else {
+        throw XZError.internalError(
+          "Failed to write: \(String(cString: strerror(errno)))"
+        )
+      }
+      totalWritten += n
     }
   }
 }

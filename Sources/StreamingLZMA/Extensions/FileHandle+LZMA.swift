@@ -20,6 +20,8 @@ extension FileHandle {
     progress: ((Int64) -> Void)? = nil
   ) throws(LZMAError) {
     let bufferSize = configuration.bufferSize.bytes
+    let srcFD = self.fileDescriptor,
+      dstFD = destination.fileDescriptor
 
     // Initialize compression stream
     var stream = compression_stream(
@@ -49,25 +51,19 @@ extension FileHandle {
 
     // Process input in chunks
     while true {
-      let chunk: Data
-      do {
-        chunk = try _readData(ofLength: bufferSize)
-      } catch {
-        throw LZMAError.internalError("Failed to read from source: \(error)")
+      let bytesRead = Darwin.read(srcFD, sourceBuffer, bufferSize)
+      guard bytesRead >= 0 else {
+        throw LZMAError.internalError(
+          "Failed to read from source: \(String(cString: strerror(errno)))"
+        )
       }
+      if bytesRead == 0 { break }
 
-      if chunk.isEmpty {
-        break
-      }
-
-      totalBytesRead += Int64(chunk.count)
+      totalBytesRead += Int64(bytesRead)
       progress?(totalBytesRead)
 
-      // Copy to our buffer
-      chunk.copyBytes(to: sourceBuffer, count: chunk.count)
-
       stream.src_ptr = UnsafePointer(sourceBuffer)
-      stream.src_size = chunk.count
+      stream.src_size = bytesRead
       stream.dst_ptr = destinationBuffer
       stream.dst_size = bufferSize
 
@@ -76,12 +72,7 @@ extension FileHandle {
 
         let outputSize = bufferSize - stream.dst_size
         if outputSize > 0 {
-          let outputData = Data(bytes: destinationBuffer, count: outputSize)
-          do {
-            try destination.write(contentsOf: outputData)
-          } catch {
-            throw LZMAError.internalError("Failed to write: \(error)")
-          }
+          try Self._writeAll(dstFD, destinationBuffer, outputSize)
         }
 
         if status == COMPRESSION_STATUS_ERROR {
@@ -103,12 +94,7 @@ extension FileHandle {
 
       let outputSize = bufferSize - stream.dst_size
       if outputSize > 0 {
-        let outputData = Data(bytes: destinationBuffer, count: outputSize)
-        do {
-          try destination.write(contentsOf: outputData)
-        } catch {
-          throw LZMAError.internalError("Failed to write final data: \(error)")
-        }
+        try Self._writeAll(dstFD, destinationBuffer, outputSize)
       }
 
       if status == COMPRESSION_STATUS_END {
@@ -139,6 +125,8 @@ extension FileHandle {
     progress: ((Int64) -> Void)? = nil
   ) throws(LZMAError) {
     let bufferSize = configuration.bufferSize.bytes
+    let srcFD = self.fileDescriptor,
+      dstFD = destination.fileDescriptor
 
     // Initialize decompression stream
     var stream = compression_stream(
@@ -168,25 +156,19 @@ extension FileHandle {
 
     // Process input in chunks
     while true {
-      let chunk: Data
-      do {
-        chunk = try _readData(ofLength: bufferSize)
-      } catch {
-        throw LZMAError.internalError("Failed to read from source: \(error)")
+      let bytesRead = Darwin.read(srcFD, sourceBuffer, bufferSize)
+      guard bytesRead >= 0 else {
+        throw LZMAError.internalError(
+          "Failed to read from source: \(String(cString: strerror(errno)))"
+        )
       }
+      if bytesRead == 0 { break }
 
-      if chunk.isEmpty {
-        break
-      }
-
-      totalBytesRead += Int64(chunk.count)
+      totalBytesRead += Int64(bytesRead)
       progress?(totalBytesRead)
 
-      // Copy to our buffer
-      chunk.copyBytes(to: sourceBuffer, count: chunk.count)
-
       stream.src_ptr = UnsafePointer(sourceBuffer)
-      stream.src_size = chunk.count
+      stream.src_size = bytesRead
       stream.dst_ptr = destinationBuffer
       stream.dst_size = bufferSize
 
@@ -195,12 +177,7 @@ extension FileHandle {
 
         let outputSize = bufferSize - stream.dst_size
         if outputSize > 0 {
-          let outputData = Data(bytes: destinationBuffer, count: outputSize)
-          do {
-            try destination.write(contentsOf: outputData)
-          } catch {
-            throw LZMAError.internalError("Failed to write: \(error)")
-          }
+          try Self._writeAll(dstFD, destinationBuffer, outputSize)
         }
 
         if status == COMPRESSION_STATUS_ERROR {
@@ -230,12 +207,7 @@ extension FileHandle {
 
       let outputSize = bufferSize - stream.dst_size
       if outputSize > 0 {
-        let outputData = Data(bytes: destinationBuffer, count: outputSize)
-        do {
-          try destination.write(contentsOf: outputData)
-        } catch {
-          throw LZMAError.internalError("Failed to write final data: \(error)")
-        }
+        try Self._writeAll(dstFD, destinationBuffer, outputSize)
       }
 
       if status == COMPRESSION_STATUS_END {
@@ -325,6 +297,27 @@ extension FileHandle {
       return try read(upToCount: length) ?? Data()
     } else {
       return readData(ofLength: length)
+    }
+  }
+
+  /// Writes all bytes from a buffer to a file descriptor, retrying on partial writes.
+  ///
+  /// Uses `Darwin.write` instead of `FileHandle.write(contentsOf:)` to avoid creating
+  /// autoreleased `NSData` objects that accumulate in tight streaming loops.
+  private static func _writeAll(
+    _ fd: Int32,
+    _ buffer: UnsafePointer<UInt8>,
+    _ count: Int
+  ) throws(LZMAError) {
+    var totalWritten = 0
+    while totalWritten < count {
+      let n = Darwin.write(fd, buffer + totalWritten, count - totalWritten)
+      guard n > 0 else {
+        throw LZMAError.internalError(
+          "Failed to write: \(String(cString: strerror(errno)))"
+        )
+      }
+      totalWritten += n
     }
   }
 }
