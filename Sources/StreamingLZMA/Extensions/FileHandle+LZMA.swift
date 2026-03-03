@@ -2,6 +2,29 @@ import Compression
 import Foundation
 
 extension FileHandle {
+  // MARK: - Type Methods
+
+  /// Writes all bytes from a buffer to a file descriptor, retrying on partial writes.
+  ///
+  /// Uses `Darwin.write` instead of `FileHandle.write(contentsOf:)` to avoid creating
+  /// autoreleased `NSData` objects that accumulate in tight streaming loops.
+  private static func _writeAll(
+    _ fd: Int32,
+    _ buffer: UnsafePointer<UInt8>,
+    _ count: Int
+  ) throws(LZMAError) {
+    var totalWritten = 0
+    while totalWritten < count {
+      let n = Darwin.write(fd, buffer + totalWritten, count - totalWritten)
+      guard n > 0 else {
+        throw LZMAError.internalError(
+          "Failed to write: \(String(cString: strerror(errno)))"
+        )
+      }
+      totalWritten += n
+    }
+  }
+
   // MARK: - Raw Stream API
 
   /// Compresses data from this file handle to a destination file handle (raw stream).
@@ -297,27 +320,6 @@ extension FileHandle {
       return try read(upToCount: length) ?? Data()
     } else {
       return readData(ofLength: length)
-    }
-  }
-
-  /// Writes all bytes from a buffer to a file descriptor, retrying on partial writes.
-  ///
-  /// Uses `Darwin.write` instead of `FileHandle.write(contentsOf:)` to avoid creating
-  /// autoreleased `NSData` objects that accumulate in tight streaming loops.
-  private static func _writeAll(
-    _ fd: Int32,
-    _ buffer: UnsafePointer<UInt8>,
-    _ count: Int
-  ) throws(LZMAError) {
-    var totalWritten = 0
-    while totalWritten < count {
-      let n = Darwin.write(fd, buffer + totalWritten, count - totalWritten)
-      guard n > 0 else {
-        throw LZMAError.internalError(
-          "Failed to write: \(String(cString: strerror(errno)))"
-        )
-      }
-      totalWritten += n
     }
   }
 }

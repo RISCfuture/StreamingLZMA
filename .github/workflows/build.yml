@@ -44,23 +44,21 @@ jobs:
         run: swift test
 
   test-ios:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_26.0.app
-      - name: Install iOS platform
-        run: xcodebuild -downloadPlatform iOS
       - name: Build for iOS
         run: xcodebuild build -scheme StreamingLZMA -destination 'generic/platform=iOS'
 
   swift-format:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
+    container:
+      image: swift:latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install swift-format
-        run: brew install swift-format
-      - name: Download swift-format config
-        run: curl -sL https://gist.githubusercontent.com/RISCfuture/e0c21afb7bd80a88d128a42bf40d2ecd/raw/.swift-format -o .swift-format
+      - name: Download .swift-format config
+        run: |
+          apt-get update && apt-get install -y wget
+          wget -O .swift-format https://gist.githubusercontent.com/RISCfuture/e0c21afb7bd80a88d128a42bf40d2ecd/raw/.swift-format
       - name: Run swift-format lint
-        run: swift-format lint -rs .
+        run: swift format lint -rs .
