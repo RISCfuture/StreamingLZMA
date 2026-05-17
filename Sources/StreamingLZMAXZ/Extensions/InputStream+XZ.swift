@@ -5,9 +5,9 @@ extension InputStream {
 
   /// Processes XZ compression of an input stream.
   ///
-  /// The `@concurrent` attribute ensures this function runs off the calling actor,
-  /// making it suitable for blocking I/O operations.
-  @concurrent
+  /// The `@Sendable` attribute allows this function to run off the calling actor
+  /// on a `Task`, making it suitable for blocking I/O operations.
+  @Sendable
   private static func processXZCompression(
     _ wrapper: _XZUnsafeSendableInputStream,
     continuation: AsyncThrowingStream<Data, Error>.Continuation,
@@ -60,9 +60,9 @@ extension InputStream {
 
   /// Processes XZ decompression of an input stream.
   ///
-  /// The `@concurrent` attribute ensures this function runs off the calling actor,
-  /// making it suitable for blocking I/O operations.
-  @concurrent
+  /// The `@Sendable` attribute allows this function to run off the calling actor
+  /// on a `Task`, making it suitable for blocking I/O operations.
+  @Sendable
   private static func processXZDecompression(
     _ wrapper: _XZUnsafeSendableInputStream,
     continuation: AsyncThrowingStream<Data, Error>.Continuation,
