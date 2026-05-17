@@ -139,14 +139,14 @@ func compress(data: Data, using api: CompressionAPI, configuration: LZMAConfigur
       return result
 
     case .fileHandle:
-      return try await compressViaFileHandle(
+      return try compressViaFileHandle(
         data: data,
         useFileFormat: false,
         configuration: configuration
       )
 
     case .fileHandleFile:
-      return try await compressViaFileHandle(
+      return try compressViaFileHandle(
         data: data,
         useFileFormat: true,
         configuration: configuration
@@ -186,14 +186,14 @@ func decompress(data: Data, using api: CompressionAPI, configuration: LZMAConfig
       return result
 
     case .fileHandle:
-      return try await decompressViaFileHandle(
+      return try decompressViaFileHandle(
         data: data,
         useFileFormat: false,
         configuration: configuration
       )
 
     case .fileHandleFile:
-      return try await decompressViaFileHandle(
+      return try decompressViaFileHandle(
         data: data,
         useFileFormat: true,
         configuration: configuration
