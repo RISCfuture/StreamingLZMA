@@ -25,6 +25,11 @@ public enum LZMAError: Error, Sendable, Hashable {
 
   /// An internal error occurred.
   case internalError(String)
+
+  /// A low-level POSIX I/O failure, such as the disk being full while
+  /// writing output. `code` is the raw `errno` value captured at the
+  /// failure site; `operation` describes what was being attempted.
+  case ioFailure(operation: String, code: Int32)
 }
 
 extension LZMAError: CustomStringConvertible {
@@ -46,6 +51,8 @@ extension LZMAError: CustomStringConvertible {
         return "Invalid configuration: \(message)"
       case .internalError(let message):
         return "Internal error: \(message)"
+      case .ioFailure(let operation, let code):
+        return "Failed to \(operation): \(String(cString: strerror(code)))"
     }
   }
 }
@@ -64,6 +71,8 @@ extension LZMAError: CustomStringConvertible {
           return String(localized: "Invalid Configuration", bundle: .module)
         case .internalError:
           return String(localized: "Internal Error", bundle: .module)
+        case .ioFailure:
+          return String(localized: "I/O Error", bundle: .module)
       }
     }
 
@@ -100,6 +109,11 @@ extension LZMAError: CustomStringConvertible {
           return String(localized: "Invalid configuration: \(message)", bundle: .module)
         case .internalError(let message):
           return String(localized: "An internal error occurred: \(message)", bundle: .module)
+        case .ioFailure(let operation, let code):
+          return String(
+            localized: "Failed to \(operation): \(String(cString: strerror(code))).",
+            bundle: .module
+          )
       }
     }
 
@@ -128,9 +142,24 @@ extension LZMAError: CustomStringConvertible {
             bundle: .module
           )
         case .streamInitializationFailed, .processingFailed, .bufferAllocationFailed,
-          .internalError:
+          .internalError, .ioFailure:
           return nil
       }
     }
   }
 #endif
+
+extension LZMAError: CustomNSError {
+  /// Bridges ``ioFailure(operation:code:)`` to an `NSError` carrying an
+  /// `NSPOSIXErrorDomain` underlying error, so callers can detect specific
+  /// conditions (e.g. `ENOSPC`) by inspecting `NSUnderlyingErrorKey` or
+  /// matching the case directly, rather than parsing error strings.
+  public var errorUserInfo: [String: Any] {
+    switch self {
+      case .ioFailure(_, let code):
+        return [NSUnderlyingErrorKey: NSError(domain: NSPOSIXErrorDomain, code: Int(code))]
+      default:
+        return [:]
+    }
+  }
+}
