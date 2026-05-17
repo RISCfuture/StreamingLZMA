@@ -17,9 +17,7 @@ extension FileHandle {
     while totalWritten < count {
       let n = Darwin.write(fd, buffer + totalWritten, count - totalWritten)
       guard n > 0 else {
-        throw LZMAError.internalError(
-          "Failed to write: \(String(cString: strerror(errno)))"
-        )
+        throw LZMAError.ioFailure(operation: "write", code: errno)
       }
       totalWritten += n
     }
@@ -76,9 +74,7 @@ extension FileHandle {
     while true {
       let bytesRead = Darwin.read(srcFD, sourceBuffer, bufferSize)
       guard bytesRead >= 0 else {
-        throw LZMAError.internalError(
-          "Failed to read from source: \(String(cString: strerror(errno)))"
-        )
+        throw LZMAError.ioFailure(operation: "read from source", code: errno)
       }
       if bytesRead == 0 { break }
 
@@ -181,9 +177,7 @@ extension FileHandle {
     while true {
       let bytesRead = Darwin.read(srcFD, sourceBuffer, bufferSize)
       guard bytesRead >= 0 else {
-        throw LZMAError.internalError(
-          "Failed to read from source: \(String(cString: strerror(errno)))"
-        )
+        throw LZMAError.ioFailure(operation: "read from source", code: errno)
       }
       if bytesRead == 0 { break }
 

@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `LZMAError.ioFailure(operation:code:)` and `XZError.ioFailure(operation:code:)`, carrying the raw POSIX `errno` from a failed read/write syscall
+- `CustomNSError` conformance on `LZMAError` and `XZError`: an `ioFailure` now bridges to an `NSError` whose `NSUnderlyingErrorKey` is an `NSPOSIXErrorDomain` error, so callers can detect conditions such as `ENOSPC` (disk full) by type instead of parsing error strings
+
+### Changed
+
+- FileHandle streaming read/write syscall failures now throw `ioFailure(operation:code:)` instead of `internalError(_:)` with a preformatted string. The human-readable `description`/`failureReason` text is unchanged, but code that exhaustively switches over `LZMAError`/`XZError` will need to handle the new case
+
 ## [1.1.0] - 2026-05-01
 
 ### Added

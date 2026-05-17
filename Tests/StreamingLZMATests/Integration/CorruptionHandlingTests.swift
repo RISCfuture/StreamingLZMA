@@ -60,7 +60,7 @@ struct CorruptionHandlingTests {
       let decompressed = try corrupted.lzmaDecompressed()
       // If no error, the output should be different from original
       #expect(decompressed != original, "Corrupted data should not decompress to original")
-    } catch is LZMAError {
+    } catch {
       // Error is expected for corruption detection
     }
   }

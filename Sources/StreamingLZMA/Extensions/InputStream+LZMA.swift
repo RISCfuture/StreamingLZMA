@@ -6,9 +6,9 @@ extension InputStream {
 
   /// Processes compression of an input stream.
   ///
-  /// The `@concurrent` attribute ensures this function runs off the calling actor,
-  /// making it suitable for blocking I/O operations.
-  @concurrent
+  /// The `@Sendable` attribute allows this function to run off the calling actor
+  /// on a `Task`, making it suitable for blocking I/O operations.
+  @Sendable
   private static func processCompression(
     _ wrapper: _UnsafeSendableInputStream,
     continuation: AsyncThrowingStream<Data, Error>.Continuation,
@@ -61,9 +61,9 @@ extension InputStream {
 
   /// Processes decompression of an input stream.
   ///
-  /// The `@concurrent` attribute ensures this function runs off the calling actor,
-  /// making it suitable for blocking I/O operations.
-  @concurrent
+  /// The `@Sendable` attribute allows this function to run off the calling actor
+  /// on a `Task`, making it suitable for blocking I/O operations.
+  @Sendable
   private static func processDecompression(
     _ wrapper: _UnsafeSendableInputStream,
     continuation: AsyncThrowingStream<Data, Error>.Continuation,
