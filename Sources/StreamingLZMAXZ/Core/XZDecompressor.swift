@@ -23,13 +23,11 @@ import Foundation
 /// For synchronous one-shot decompression, use the `Data.xzDecompressed()` extension instead.
 public actor XZDecompressor {
   private var stream: XZStream
-  private let configuration: XZConfiguration
 
   /// Creates a new XZ decompressor.
   /// - Parameter configuration: The decompression configuration to use.
   /// - Throws: ``XZError/streamInitializationFailed`` if the decompressor cannot be initialized.
   public init(configuration: XZConfiguration = .default) throws(XZError) {
-    self.configuration = configuration
     self.stream = try XZStream(
       direction: .decompress,
       bufferSize: configuration.bufferSize.bytes

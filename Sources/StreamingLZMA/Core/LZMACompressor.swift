@@ -23,13 +23,11 @@ import Foundation
 /// For synchronous one-shot compression, use the `Data.lzmaCompressed()` extension instead.
 public actor LZMACompressor {
   private var stream: LZMAStream
-  private let configuration: LZMAConfiguration
 
   /// Creates a new LZMA compressor.
   /// - Parameter configuration: The compression configuration to use.
   /// - Throws: ``LZMAError/streamInitializationFailed`` if the compressor cannot be initialized.
   public init(configuration: LZMAConfiguration = .default) throws(LZMAError) {
-    self.configuration = configuration
     self.stream = try LZMAStream(
       direction: .compress,
       bufferSize: configuration.bufferSize.bytes

@@ -23,13 +23,11 @@ import Foundation
 /// For synchronous one-shot decompression, use the `Data.lzmaDecompressed()` extension instead.
 public actor LZMADecompressor {
   private var stream: LZMAStream
-  private let configuration: LZMAConfiguration
 
   /// Creates a new LZMA decompressor.
   /// - Parameter configuration: The decompression configuration to use.
   /// - Throws: ``LZMAError/streamInitializationFailed`` if the decompressor cannot be initialized.
   public init(configuration: LZMAConfiguration = .default) throws(LZMAError) {
-    self.configuration = configuration
     self.stream = try LZMAStream(
       direction: .decompress,
       bufferSize: configuration.bufferSize.bytes
