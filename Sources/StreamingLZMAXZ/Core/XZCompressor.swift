@@ -23,13 +23,11 @@ import Foundation
 /// For synchronous one-shot compression, use the `Data.xzCompressed()` extension instead.
 public actor XZCompressor {
   private var stream: XZStream
-  private let configuration: XZConfiguration
 
   /// Creates a new XZ compressor.
   /// - Parameter configuration: The compression configuration to use.
   /// - Throws: ``XZError/streamInitializationFailed`` if the compressor cannot be initialized.
   public init(configuration: XZConfiguration = .default) throws(XZError) {
-    self.configuration = configuration
     self.stream = try XZStream(
       direction: .compress,
       bufferSize: configuration.bufferSize.bytes,

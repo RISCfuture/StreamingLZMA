@@ -104,16 +104,6 @@ enum CompressionAPI: String, CaseIterable, CustomStringConvertible {
   case inputStream = "InputStream"
 
   var description: String { rawValue }
-
-  /// Whether this API uses the .lzma file format with header.
-  var usesFileFormat: Bool {
-    switch self {
-      case .dataExtensionFile, .fileHandleFile:
-        return true
-      default:
-        return false
-    }
-  }
 }
 
 /// Compresses data using the specified API.

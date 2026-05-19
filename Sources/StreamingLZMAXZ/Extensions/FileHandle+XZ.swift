@@ -237,17 +237,4 @@ extension FileHandle {
       stream.avail_out = bufferSize
     }
   }
-
-  // MARK: - Internal
-
-  /// Reads up to the specified number of bytes.
-  /// - Parameter length: Maximum number of bytes to read.
-  /// - Returns: The data read, or empty data if at end of file.
-  private func _xzReadData(ofLength length: Int) throws -> Data {
-    if #available(macOS 10.15.4, iOS 13.4, tvOS 13.4, watchOS 6.2, *) {
-      return try read(upToCount: length) ?? Data()
-    } else {
-      return readData(ofLength: length)
-    }
-  }
 }
