@@ -1,12 +1,22 @@
-.DS_Store
-/.build
-/Packages
-xcuserdata/
-DerivedData/
+# Swift Package Manager
+.build/
 .swiftpm/configuration/registries.json
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+/Packages
+
+# Xcode user state
+xcuserdata/
+DerivedData/
+
+# netrc credentials
 .netrc
+
+# Documentation
 /docs
 /.docc-build
+
+# SwiftLint remote config cache
 .swiftlint/RemoteConfigCache
+
+# swift-format (downloaded in CI)
 .swift-format
