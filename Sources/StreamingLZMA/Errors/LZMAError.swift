@@ -51,7 +51,7 @@ extension LZMAError: CustomStringConvertible {
         return "Invalid configuration: \(message)"
       case .internalError(let message):
         return "Internal error: \(message)"
-      case .ioFailure(let operation, let code):
+      case let .ioFailure(operation, code):
         return "Failed to \(operation): \(String(cString: strerror(code)))"
     }
   }
@@ -109,7 +109,7 @@ extension LZMAError: CustomStringConvertible {
           return String(localized: "Invalid configuration: \(message)", bundle: .module)
         case .internalError(let message):
           return String(localized: "An internal error occurred: \(message)", bundle: .module)
-        case .ioFailure(let operation, let code):
+        case let .ioFailure(operation, code):
           return String(
             localized: "Failed to \(operation): \(String(cString: strerror(code))).",
             bundle: .module

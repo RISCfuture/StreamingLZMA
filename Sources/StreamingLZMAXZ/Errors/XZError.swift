@@ -51,7 +51,7 @@ extension XZError: CustomStringConvertible {
         return "Stream has already been finalized"
       case .internalError(let message):
         return "Internal error: \(message)"
-      case .ioFailure(let operation, let code):
+      case let .ioFailure(operation, code):
         return "Failed to \(operation): \(String(cString: strerror(code)))"
     }
   }
@@ -112,7 +112,7 @@ extension XZError: CustomStringConvertible {
           )
         case .internalError(let message):
           return String(localized: "An internal error occurred: \(message)", bundle: .module)
-        case .ioFailure(let operation, let code):
+        case let .ioFailure(operation, code):
           return String(
             localized: "Failed to \(operation): \(String(cString: strerror(code))).",
             bundle: .module
