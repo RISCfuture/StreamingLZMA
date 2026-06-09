@@ -9,6 +9,7 @@ StreamingLZMA provides efficient, memory-friendly LZMA compression and decompres
 For XZ container format support, see the `StreamingLZMAXZ` module, which requires the system `liblzma` library.
 
 The library offers multiple APIs to suit different use cases:
+
 - **One-shot methods** for simple compression of in-memory data
 - **Streaming classes** for processing data incrementally
 - **FileHandle extensions** for file-based operations

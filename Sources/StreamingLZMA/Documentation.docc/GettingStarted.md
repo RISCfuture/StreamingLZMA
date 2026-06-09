@@ -34,11 +34,13 @@ StreamingLZMA uses Apple's built-in Compression framework and has no external de
 For XZ container format support, add the `StreamingLZMAXZ` target instead, which requires the system `liblzma` library:
 
 **macOS:**
+
 ```bash
 brew install xz
 ```
 
 **Ubuntu/Debian:**
+
 ```bash
 apt-get install liblzma-dev
 ```

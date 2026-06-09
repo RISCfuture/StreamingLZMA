@@ -34,16 +34,19 @@ dependencies: [
 StreamingLZMA requires the liblzma library to be installed on your system.
 
 **macOS:**
+
 ```bash
 brew install xz
 ```
 
 **Ubuntu/Debian:**
+
 ```bash
 apt-get install liblzma-dev
 ```
 
 **Fedora/RHEL:**
+
 ```bash
 dnf install xz-devel
 ```
