@@ -3,6 +3,11 @@
 
 import PackageDescription
 
+let approachableConcurrency: [SwiftSetting] = [
+  .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+  .enableUpcomingFeature("InferIsolatedConformances")
+]
+
 let package = Package(
   name: "StreamingLZMA",
   defaultLocalization: "en",
@@ -45,39 +50,45 @@ let package = Package(
       name: "StreamingLZMA",
       resources: [
         .process("Resources")
-      ]
+      ],
+      swiftSettings: approachableConcurrency
     ),
     .target(
       name: "StreamingLZMAXZ",
       dependencies: ["Clzma"],
       resources: [
         .process("Resources")
-      ]
+      ],
+      swiftSettings: approachableConcurrency
     ),
     .executableTarget(
       name: "lzma-tool",
       dependencies: [
         "StreamingLZMA",
         .product(name: "ArgumentParser", package: "swift-argument-parser")
-      ]
+      ],
+      swiftSettings: approachableConcurrency
     ),
     .executableTarget(
       name: "xz-tool",
       dependencies: [
         "StreamingLZMAXZ",
         .product(name: "ArgumentParser", package: "swift-argument-parser")
-      ]
+      ],
+      swiftSettings: approachableConcurrency
     ),
     .testTarget(
       name: "StreamingLZMATests",
       dependencies: ["StreamingLZMA"],
       resources: [
         .copy("Fixtures")
-      ]
+      ],
+      swiftSettings: approachableConcurrency
     ),
     .testTarget(
       name: "StreamingLZMAXZTests",
-      dependencies: ["StreamingLZMAXZ"]
+      dependencies: ["StreamingLZMAXZ"],
+      swiftSettings: approachableConcurrency
     )
   ]
 )
