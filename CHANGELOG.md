@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-06-26
+
+### Changed
+
+- Adopted Swift's Approachable Concurrency upcoming-feature flags
+  (`NonisolatedNonsendingByDefault`, `InferIsolatedConformances`). This is a
+  source-compatible concurrency modernization: the public API is unchanged and
+  the package's actor-based, async/await streaming surface
+  (`LZMACompressor`/`LZMADecompressor`/`XZCompressor`/`XZDecompressor` and the
+  `AsyncThrowingStream`-returning extensions) behaves as before.
+
 ## [1.2.0] - 2026-05-17
 
 ### Added
