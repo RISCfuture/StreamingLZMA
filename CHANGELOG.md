@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2026-07-06
+
+### Fixed
+
+- `StreamingLZMAXZ`'s `FileHandle` streaming extensions now build on Linux. The POSIX
+  `read`/`write` calls were qualified as `Darwin.*`, which does not exist off Apple
+  platforms; they are now dispatched through small platform-guarded wrappers
+  (`Darwin`/`Glibc`/`Musl`), so the XZ module compiles and runs on Linux.
+
 ## [1.3.0] - 2026-06-26
 
 ### Changed

@@ -1,12 +1,44 @@
 import Clzma
 import Foundation
 
+#if canImport(Darwin)
+  import Darwin
+#elseif canImport(Glibc)
+  import Glibc
+#elseif canImport(Musl)
+  import Musl
+#endif
+
+/// POSIX `write`, qualified per-platform to disambiguate from `FileHandle.write`.
+@inline(__always)
+private func posixWrite(_ fd: Int32, _ buffer: UnsafeRawPointer, _ count: Int) -> Int {
+  #if canImport(Darwin)
+    Darwin.write(fd, buffer, count)
+  #elseif canImport(Glibc)
+    Glibc.write(fd, buffer, count)
+  #elseif canImport(Musl)
+    Musl.write(fd, buffer, count)
+  #endif
+}
+
+/// POSIX `read`, qualified per-platform to disambiguate from `FileHandle.read`.
+@inline(__always)
+private func posixRead(_ fd: Int32, _ buffer: UnsafeMutableRawPointer, _ count: Int) -> Int {
+  #if canImport(Darwin)
+    Darwin.read(fd, buffer, count)
+  #elseif canImport(Glibc)
+    Glibc.read(fd, buffer, count)
+  #elseif canImport(Musl)
+    Musl.read(fd, buffer, count)
+  #endif
+}
+
 extension FileHandle {
   // MARK: - Type Methods
 
   /// Writes all bytes from a buffer to a file descriptor, retrying on partial writes.
   ///
-  /// Uses `Darwin.write` instead of `FileHandle.write(contentsOf:)` to avoid creating
+  /// Uses the POSIX `write` instead of `FileHandle.write(contentsOf:)` to avoid creating
   /// autoreleased `NSData` objects that accumulate in tight streaming loops.
   private static func _xzWriteAll(
     _ fd: Int32,
@@ -15,7 +47,7 @@ extension FileHandle {
   ) throws(XZError) {
     var totalWritten = 0
     while totalWritten < count {
-      let n = Darwin.write(fd, buffer + totalWritten, count - totalWritten)
+      let n = posixWrite(fd, buffer + totalWritten, count - totalWritten)
       guard n > 0 else {
         throw XZError.ioFailure(operation: "write", code: errno)
       }
@@ -68,7 +100,7 @@ extension FileHandle {
 
     // Process input in chunks
     while true {
-      let bytesRead = Darwin.read(srcFD, sourceBuffer, bufferSize)
+      let bytesRead = posixRead(srcFD, sourceBuffer, bufferSize)
       guard bytesRead >= 0 else {
         throw XZError.ioFailure(operation: "read from source", code: errno)
       }
@@ -168,7 +200,7 @@ extension FileHandle {
 
     // Process input in chunks
     while true {
-      let bytesRead = Darwin.read(srcFD, sourceBuffer, bufferSize)
+      let bytesRead = posixRead(srcFD, sourceBuffer, bufferSize)
       guard bytesRead >= 0 else {
         throw XZError.ioFailure(operation: "read from source", code: errno)
       }
