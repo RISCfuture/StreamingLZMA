@@ -8,9 +8,6 @@
 xcuserdata/
 DerivedData/
 
-# netrc credentials
-.netrc
-
 # Documentation
 /docs
 /.docc-build
@@ -20,3 +17,4 @@ DerivedData/
 
 # swift-format (downloaded in CI)
 .swift-format
+.claude/settings.local.json
