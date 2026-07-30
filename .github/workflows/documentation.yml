@@ -33,6 +33,25 @@ jobs:
             --transform-for-static-hosting \
             --hosting-base-path StreamingLZMA \
             --output-path docs
+      - name: Create root redirect
+        run: |
+          cat > docs/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta http-equiv="refresh" content="0; url=/StreamingLZMA/documentation/streaminglzma/">
+              <title>StreamingLZMA Documentation</title>
+              <script>
+                  window.location.replace("/StreamingLZMA/documentation/streaminglzma/");
+              </script>
+          </head>
+          <body>
+              <p>Redirecting to
+                  <a href="/StreamingLZMA/documentation/streaminglzma/">StreamingLZMA Documentation</a>...</p>
+          </body>
+          </html>
+          EOF
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:
