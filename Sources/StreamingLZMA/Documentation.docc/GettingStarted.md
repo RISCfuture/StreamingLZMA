@@ -50,6 +50,7 @@ apt-get install liblzma-dev
 The simplest way to compress data is using the one-shot class methods:
 
 ```swift
+import Foundation
 import StreamingLZMA
 
 // Compress data

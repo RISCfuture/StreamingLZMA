@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-08-18
+
+### Removed
+
+- **Breaking:** `StreamingLZMA` no longer re-exports `Foundation`. Code that relied on
+  `import StreamingLZMA` to bring `Data`, `URL`, or `FileHandle` into scope must now
+  `import Foundation` itself.
+
+### Fixed
+
+- Documentation builds no longer hang. The `@_exported import Foundation` placed the whole
+  of Foundation into `StreamingLZMA`'s own symbol graph — 10,056 symbols across 26 MB,
+  against 71 symbols for the module's actual API — which `docc convert` could not curate in
+  bounded time. Any consumer running `xcodebuild docbuild` over a dependency graph including
+  this package would spin indefinitely. The symbol graph is now 167 KB, and Foundation is
+  correctly recorded as an extended module rather than part of this one.
+
 ## [1.3.1] - 2026-07-06
 
 ### Fixed

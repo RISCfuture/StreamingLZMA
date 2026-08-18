@@ -1,9 +1,6 @@
 // StreamingLZMA
 // A Swift library for LZMA compression and decompression using Apple's Compression framework.
 
-// Re-export all public types
-@_exported import Foundation
-
 // Public API is provided through:
 // - LZMAConfiguration: Configuration options for buffer size
 // - LZMAError: Error types for compression/decompression failures

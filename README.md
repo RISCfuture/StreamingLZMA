@@ -56,6 +56,7 @@ dnf install xz-devel
 ### One-Shot Compression
 
 ```swift
+import Foundation
 import StreamingLZMA
 
 // Compress data
