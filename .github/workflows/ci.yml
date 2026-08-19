@@ -55,6 +55,22 @@ jobs:
           swift-version: "6.2"
       - name: Build for iOS
         run: xcodebuild build -scheme StreamingLZMA -destination 'generic/platform=iOS'
+  documentation:
+    name: Build Documentation
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: SwiftyLab/setup-swift@latest
+        with:
+          swift-version: "6.2"
+      - name: Install liblzma
+        run: brew install xz
+      - name: Build documentation
+        run: |
+          swift package --allow-writing-to-directory "$RUNNER_TEMP/docs" \
+            generate-documentation --target StreamingLZMA \
+            --warnings-as-errors \
+            --output-path "$RUNNER_TEMP/docs"
   lint:
     name: Run SwiftLint
     runs-on: macos-latest
