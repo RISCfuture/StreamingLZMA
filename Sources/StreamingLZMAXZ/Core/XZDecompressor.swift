@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// A streaming XZ decompressor that processes data incrementally.
 ///

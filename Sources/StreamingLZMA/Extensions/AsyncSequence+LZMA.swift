@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 // MARK: - AsyncSequence where Element == UInt8
 
@@ -12,7 +12,7 @@ extension AsyncSequence where Element == UInt8, Self: Sendable {
   /// - Returns: An async throwing stream of compressed data chunks.
   public func lzmaCompressed(
     configuration: LZMAConfiguration = .default
-  ) -> AsyncThrowingStream<Data, Error> {
+  ) -> AsyncThrowingStream<Data, any Error> {
     let sequence = self
     return AsyncThrowingStream { continuation in
       Task {
@@ -67,7 +67,7 @@ extension AsyncSequence where Element == UInt8, Self: Sendable {
   /// - Returns: An async throwing stream of decompressed data chunks.
   public func lzmaDecompressed(
     configuration: LZMAConfiguration = .default
-  ) -> AsyncThrowingStream<Data, Error> {
+  ) -> AsyncThrowingStream<Data, any Error> {
     let sequence = self
     return AsyncThrowingStream { continuation in
       Task {
@@ -126,7 +126,7 @@ extension AsyncSequence where Element == Data, Self: Sendable {
   /// - Returns: An async throwing stream of compressed data chunks.
   public func lzmaCompressed(
     configuration: LZMAConfiguration = .default
-  ) -> AsyncThrowingStream<Data, Error> {
+  ) -> AsyncThrowingStream<Data, any Error> {
     let sequence = self
     return AsyncThrowingStream { continuation in
       Task {
@@ -165,7 +165,7 @@ extension AsyncSequence where Element == Data, Self: Sendable {
   /// - Returns: An async throwing stream of decompressed data chunks.
   public func lzmaDecompressed(
     configuration: LZMAConfiguration = .default
-  ) -> AsyncThrowingStream<Data, Error> {
+  ) -> AsyncThrowingStream<Data, any Error> {
     let sequence = self
     return AsyncThrowingStream { continuation in
       Task {

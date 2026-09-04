@@ -1,5 +1,5 @@
 import Compression
-import Foundation
+public import Foundation
 
 extension InputStream {
   // MARK: - Private Type Methods
@@ -11,7 +11,7 @@ extension InputStream {
   @Sendable
   private static func processCompression(
     _ wrapper: _UnsafeSendableInputStream,
-    continuation: AsyncThrowingStream<Data, Error>.Continuation,
+    continuation: AsyncThrowingStream<Data, any Error>.Continuation,
     configuration: LZMAConfiguration
   ) async {
     let stream = wrapper.stream
@@ -66,7 +66,7 @@ extension InputStream {
   @Sendable
   private static func processDecompression(
     _ wrapper: _UnsafeSendableInputStream,
-    continuation: AsyncThrowingStream<Data, Error>.Continuation,
+    continuation: AsyncThrowingStream<Data, any Error>.Continuation,
     configuration: LZMAConfiguration
   ) async {
     let stream = wrapper.stream
@@ -128,7 +128,7 @@ extension InputStream {
   ///   while the returned stream is being consumed.
   public func lzmaCompressedStream(
     configuration: LZMAConfiguration = .default
-  ) -> AsyncThrowingStream<Data, Error> {
+  ) -> AsyncThrowingStream<Data, any Error> {
     let stream = _UnsafeSendableInputStream(self)
     return AsyncThrowingStream { continuation in
       Task {
@@ -152,7 +152,7 @@ extension InputStream {
   ///   while the returned stream is being consumed.
   public func lzmaDecompressedStream(
     configuration: LZMAConfiguration = .default
-  ) -> AsyncThrowingStream<Data, Error> {
+  ) -> AsyncThrowingStream<Data, any Error> {
     let stream = _UnsafeSendableInputStream(self)
     return AsyncThrowingStream { continuation in
       Task {

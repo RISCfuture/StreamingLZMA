@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 extension InputStream {
   // MARK: - Private Type Methods
@@ -10,7 +10,7 @@ extension InputStream {
   @Sendable
   private static func processXZCompression(
     _ wrapper: _XZUnsafeSendableInputStream,
-    continuation: AsyncThrowingStream<Data, Error>.Continuation,
+    continuation: AsyncThrowingStream<Data, any Error>.Continuation,
     configuration: XZConfiguration
   ) async {
     let stream = wrapper.stream
@@ -65,7 +65,7 @@ extension InputStream {
   @Sendable
   private static func processXZDecompression(
     _ wrapper: _XZUnsafeSendableInputStream,
-    continuation: AsyncThrowingStream<Data, Error>.Continuation,
+    continuation: AsyncThrowingStream<Data, any Error>.Continuation,
     configuration: XZConfiguration
   ) async {
     let stream = wrapper.stream
@@ -127,7 +127,7 @@ extension InputStream {
   ///   while the returned stream is being consumed.
   public func xzCompressedStream(
     configuration: XZConfiguration = .default
-  ) -> AsyncThrowingStream<Data, Error> {
+  ) -> AsyncThrowingStream<Data, any Error> {
     let stream = _XZUnsafeSendableInputStream(self)
     return AsyncThrowingStream { continuation in
       Task {
@@ -151,7 +151,7 @@ extension InputStream {
   ///   while the returned stream is being consumed.
   public func xzDecompressedStream(
     configuration: XZConfiguration = .default
-  ) -> AsyncThrowingStream<Data, Error> {
+  ) -> AsyncThrowingStream<Data, any Error> {
     let stream = _XZUnsafeSendableInputStream(self)
     return AsyncThrowingStream { continuation in
       Task {
