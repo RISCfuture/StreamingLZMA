@@ -2,28 +2,28 @@ import Testing
 import Foundation
 @testable import StreamingLZMA
 
-@Suite("Random Data Tests")
-struct RandomDataTests {
+@Suite
+struct `Random Data Tests` {
   // MARK: - Cryptographically Random Data Tests
 
-  @Test("Crypto random: small data (100 bytes)")
-  func cryptoRandomSmall() throws {
+  @Test
+  func `Crypto random: small data (100 bytes)`() throws {
     let original = randomData(count: 100)
     let compressed = try original.lzmaCompressed()
     let decompressed = try compressed.lzmaDecompressed()
     #expect(decompressed == original)
   }
 
-  @Test("Crypto random: medium data (10KB)")
-  func cryptoRandomMedium() throws {
+  @Test
+  func `Crypto random: medium data (10KB)`() throws {
     let original = randomData(count: 10 * 1024)
     let compressed = try original.lzmaCompressed()
     let decompressed = try compressed.lzmaDecompressed()
     #expect(decompressed == original)
   }
 
-  @Test("Crypto random: large data (100KB)")
-  func cryptoRandomLarge() throws {
+  @Test
+  func `Crypto random: large data (100KB)`() throws {
     let original = randomData(count: 100 * 1024)
     let compressed = try original.lzmaCompressed()
     let decompressed = try compressed.lzmaDecompressed()
@@ -32,8 +32,8 @@ struct RandomDataTests {
 
   // MARK: - Expansion Tests (Data That Doesn't Compress)
 
-  @Test("Expansion: random data may expand slightly when compressed")
-  func randomDataMayExpand() throws {
+  @Test
+  func `Expansion: random data may expand slightly when compressed`() throws {
     // Cryptographically random data has maximum entropy and cannot be compressed
     // LZMA will add overhead, causing slight expansion
     let original = randomData(count: 1000)
@@ -45,8 +45,8 @@ struct RandomDataTests {
     #expect(decompressed == original)
   }
 
-  @Test("Expansion: already compressed data (double compression)")
-  func doubleCompression() throws {
+  @Test
+  func `Expansion: already compressed data (double compression)`() throws {
     // First compress some data
     let original = Data((0..<10000).map { UInt8($0 & 0xFF) })
     let compressed1 = try original.lzmaCompressed()
@@ -62,8 +62,8 @@ struct RandomDataTests {
     #expect(decompressed1 == original)
   }
 
-  @Test("Expansion: triple compression")
-  func tripleCompression() throws {
+  @Test
+  func `Expansion: triple compression`() throws {
     let original = Data("Hello, triple compression test!".utf8)
 
     let c1 = try original.lzmaCompressed()
@@ -79,8 +79,8 @@ struct RandomDataTests {
 
   // MARK: - Seeded Random Tests (Reproducibility)
 
-  @Test("Seeded random: reproducible data generation")
-  func seededRandomReproducible() throws {
+  @Test
+  func `Seeded random: reproducible data generation`() throws {
     let seed: UInt64 = 12345
 
     // Generate data with same seed twice
@@ -94,8 +94,8 @@ struct RandomDataTests {
     #expect(data1 != data3, "Different seed should produce different data")
   }
 
-  @Test("Seeded random: round-trip with various seeds")
-  func seededRandomRoundTrip() throws {
+  @Test
+  func `Seeded random: round-trip with various seeds`() throws {
     let seeds: [UInt64] = [0, 1, 42, 12345, 999999, .max]
 
     for seed in seeds {
@@ -108,16 +108,16 @@ struct RandomDataTests {
 
   // MARK: - Mixed Compressibility Tests
 
-  @Test("Mixed compressibility: alternating patterns")
-  func mixedCompressibility() throws {
+  @Test
+  func `Mixed compressibility: alternating patterns`() throws {
     let original = mixedCompressibilityData(count: 10000, seed: 42)
     let compressed = try original.lzmaCompressed()
     let decompressed = try compressed.lzmaDecompressed()
     #expect(decompressed == original)
   }
 
-  @Test("Mixed compressibility: various sizes")
-  func mixedCompressibilityVariousSizes() throws {
+  @Test
+  func `Mixed compressibility: various sizes`() throws {
     for size in [100, 1000, 5000, 20000] {
       let original = mixedCompressibilityData(count: size, seed: 0xDEADBEEF)
       let compressed = try original.lzmaCompressed()
@@ -128,8 +128,8 @@ struct RandomDataTests {
 
   // MARK: - Streaming with Random Chunk Sizes
 
-  @Test("Streaming: random chunk sizes for compression")
-  func streamingRandomChunkSizes() async throws {
+  @Test
+  func `Streaming: random chunk sizes for compression`() async throws {
     let original = Data((0..<10000).map { UInt8($0 & 0xFF) })
     var rng = SeededRandomNumberGenerator(seed: 98765)
 
@@ -150,8 +150,8 @@ struct RandomDataTests {
     #expect(decompressed == original)
   }
 
-  @Test("Streaming: random chunk sizes for decompression")
-  func streamingRandomChunkSizesDecompress() async throws {
+  @Test
+  func `Streaming: random chunk sizes for decompression`() async throws {
     let original = Data((0..<10000).map { UInt8($0 & 0xFF) })
     let compressed = try original.lzmaCompressed()
     var rng = SeededRandomNumberGenerator(seed: 54321)
@@ -172,8 +172,8 @@ struct RandomDataTests {
     #expect(decompressed == original)
   }
 
-  @Test("Streaming: random chunks for both compression and decompression")
-  func streamingRandomChunksBidirectional() async throws {
+  @Test
+  func `Streaming: random chunks for both compression and decompression`() async throws {
     let original = seededRandomData(count: 5000, seed: 11111)
     var rng = SeededRandomNumberGenerator(seed: 22222)
 
@@ -208,8 +208,8 @@ struct RandomDataTests {
 
   // MARK: - Adversarial Patterns
 
-  @Test("Adversarial: worst-case repeating pattern")
-  func adversarialRepeatingPattern() throws {
+  @Test
+  func `Adversarial: worst-case repeating pattern`() throws {
     // Create a pattern that's repetitive but with slight variations
     // This tests the LZMA dictionary matching
     var data = Data()
@@ -222,8 +222,8 @@ struct RandomDataTests {
     #expect(decompressed == data)
   }
 
-  @Test("Adversarial: alternating bytes")
-  func adversarialAlternating() throws {
+  @Test
+  func `Adversarial: alternating bytes`() throws {
     var data = Data()
     for _ in 0..<5000 {
       data.append(0xAA)

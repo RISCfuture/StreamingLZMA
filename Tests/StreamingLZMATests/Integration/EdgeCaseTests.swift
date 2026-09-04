@@ -2,20 +2,20 @@ import Testing
 import Foundation
 @testable import StreamingLZMA
 
-@Suite("Edge Case Tests")
-struct EdgeCaseTests {
+@Suite
+struct `Edge Case Tests` {
   // MARK: - Tiny Chunk Tests
 
-  @Test("Tiny chunks: 1-byte input compression")
-  func oneByteCompression() throws {
+  @Test
+  func `Tiny chunks: 1-byte input compression`() throws {
     let original = Data([0x42])
     let compressed = try original.lzmaCompressed()
     let decompressed = try compressed.lzmaDecompressed()
     #expect(decompressed == original)
   }
 
-  @Test("Tiny chunks: streaming with 1-byte chunks")
-  func streamingOneByteChunks() async throws {
+  @Test
+  func `Tiny chunks: streaming with 1-byte chunks`() async throws {
     let original = Data("Hello".utf8)
 
     // Compress one byte at a time
@@ -25,8 +25,8 @@ struct EdgeCaseTests {
     #expect(decompressed == original)
   }
 
-  @Test("Tiny chunks: decompress with 1-byte chunks")
-  func decompressOneByteChunks() async throws {
+  @Test
+  func `Tiny chunks: decompress with 1-byte chunks`() async throws {
     let original = Data((0..<100).map { UInt8($0 & 0xFF) })
     let compressed = try original.lzmaCompressed()
 
@@ -38,8 +38,8 @@ struct EdgeCaseTests {
 
   // MARK: - Buffer Boundary Tests
 
-  @Test("Buffer boundary: data exactly at 16KB")
-  func bufferBoundary16KB() throws {
+  @Test
+  func `Buffer boundary: data exactly at 16KB`() throws {
     let size = 16 * 1024
     let original = Data((0..<size).map { UInt8($0 & 0xFF) })
     let compressed = try original.lzmaCompressed()
@@ -47,8 +47,8 @@ struct EdgeCaseTests {
     #expect(decompressed == original)
   }
 
-  @Test("Buffer boundary: data at 16KB - 1")
-  func bufferBoundary16KBMinus1() throws {
+  @Test
+  func `Buffer boundary: data at 16KB - 1`() throws {
     let size = 16 * 1024 - 1
     let original = Data((0..<size).map { UInt8($0 & 0xFF) })
     let compressed = try original.lzmaCompressed()
@@ -56,8 +56,8 @@ struct EdgeCaseTests {
     #expect(decompressed == original)
   }
 
-  @Test("Buffer boundary: data at 16KB + 1")
-  func bufferBoundary16KBPlus1() throws {
+  @Test
+  func `Buffer boundary: data at 16KB + 1`() throws {
     let size = 16 * 1024 + 1
     let original = Data((0..<size).map { UInt8($0 & 0xFF) })
     let compressed = try original.lzmaCompressed()
@@ -65,8 +65,8 @@ struct EdgeCaseTests {
     #expect(decompressed == original)
   }
 
-  @Test("Buffer boundary: data exactly at 64KB")
-  func bufferBoundary64KB() throws {
+  @Test
+  func `Buffer boundary: data exactly at 64KB`() throws {
     let size = 64 * 1024
     let original = Data((0..<size).map { UInt8($0 & 0xFF) })
     let compressed = try original.lzmaCompressed()
@@ -74,8 +74,8 @@ struct EdgeCaseTests {
     #expect(decompressed == original)
   }
 
-  @Test("Buffer boundary: data at 64KB - 1")
-  func bufferBoundary64KBMinus1() throws {
+  @Test
+  func `Buffer boundary: data at 64KB - 1`() throws {
     let size = 64 * 1024 - 1
     let original = Data((0..<size).map { UInt8($0 & 0xFF) })
     let compressed = try original.lzmaCompressed()
@@ -83,8 +83,8 @@ struct EdgeCaseTests {
     #expect(decompressed == original)
   }
 
-  @Test("Buffer boundary: data exactly at 256KB")
-  func bufferBoundary256KB() throws {
+  @Test
+  func `Buffer boundary: data exactly at 256KB`() throws {
     let size = 256 * 1024
     let original = Data((0..<size).map { UInt8($0 & 0xFF) })
     let compressed = try original.lzmaCompressed()
@@ -94,8 +94,8 @@ struct EdgeCaseTests {
 
   // MARK: - Chunk Splitting Tests
 
-  @Test("Chunk splitting: compressed data split at every position (small)")
-  func chunkSplittingEveryPosition() async throws {
+  @Test
+  func `Chunk splitting: compressed data split at every position (small)`() async throws {
     let original = Data("Hello".utf8)
     let compressed = try original.lzmaCompressed()
 
@@ -113,8 +113,8 @@ struct EdgeCaseTests {
     }
   }
 
-  @Test("Chunk splitting: various chunk sizes round-trip")
-  func chunkSplittingVariousSizes() async throws {
+  @Test
+  func `Chunk splitting: various chunk sizes round-trip`() async throws {
     let original = Data((0..<5000).map { UInt8($0 & 0xFF) })
 
     for chunkSize in [1, 7, 13, 100, 500, 1000, 5000] {
@@ -126,8 +126,8 @@ struct EdgeCaseTests {
 
   // MARK: - Empty Handling Tests
 
-  @Test("Empty handling: empty chunks interspersed in compression")
-  func emptyChunksInterspersed() async throws {
+  @Test
+  func `Empty handling: empty chunks interspersed in compression`() async throws {
     let compressor = try LZMACompressor()
     var result = Data()
 
@@ -143,8 +143,8 @@ struct EdgeCaseTests {
     #expect(decompressed == Data("Hello World".utf8))
   }
 
-  @Test("Empty handling: empty chunks interspersed in decompression")
-  func emptyChunksInDecompression() async throws {
+  @Test
+  func `Empty handling: empty chunks interspersed in decompression`() async throws {
     let original = Data("Test data for empty chunk handling.".utf8)
     let compressed = try original.lzmaCompressed()
 
@@ -165,8 +165,8 @@ struct EdgeCaseTests {
     #expect(result == original)
   }
 
-  @Test("Empty handling: only empty chunks then finalize")
-  func onlyEmptyChunks() async throws {
+  @Test
+  func `Empty handling: only empty chunks then finalize`() async throws {
     let compressor = try LZMACompressor()
     var result = Data()
 
@@ -184,32 +184,32 @@ struct EdgeCaseTests {
 
   // MARK: - Single Value Tests
 
-  @Test("Single value: byte 0x00")
-  func singleByteZero() throws {
+  @Test
+  func `Single value: byte 0x00`() throws {
     let original = Data([0x00])
     let compressed = try original.lzmaCompressed()
     let decompressed = try compressed.lzmaDecompressed()
     #expect(decompressed == original)
   }
 
-  @Test("Single value: byte 0xFF")
-  func singleByteFF() throws {
+  @Test
+  func `Single value: byte 0xFF`() throws {
     let original = Data([0xFF])
     let compressed = try original.lzmaCompressed()
     let decompressed = try compressed.lzmaDecompressed()
     #expect(decompressed == original)
   }
 
-  @Test("Single value: byte 0x42")
-  func singleByte42() throws {
+  @Test
+  func `Single value: byte 0x42`() throws {
     let original = Data([0x42])
     let compressed = try original.lzmaCompressed()
     let decompressed = try compressed.lzmaDecompressed()
     #expect(decompressed == original)
   }
 
-  @Test("Single value: all 256 byte values individually")
-  func allByteValues() throws {
+  @Test
+  func `Single value: all 256 byte values individually`() throws {
     for byteValue in UInt8.min...UInt8.max {
       let original = Data([byteValue])
       let compressed = try original.lzmaCompressed()
@@ -218,8 +218,8 @@ struct EdgeCaseTests {
     }
   }
 
-  @Test("Single value: all 256 byte values in sequence")
-  func allByteValuesSequence() throws {
+  @Test
+  func `Single value: all 256 byte values in sequence`() throws {
     let original = Data(UInt8.min...UInt8.max)
     let compressed = try original.lzmaCompressed()
     let decompressed = try compressed.lzmaDecompressed()
@@ -228,8 +228,8 @@ struct EdgeCaseTests {
 
   // MARK: - Repeated Single Values
 
-  @Test("Repeated value: 1000 zeros")
-  func repeatedZeros() throws {
+  @Test
+  func `Repeated value: 1000 zeros`() throws {
     let original = Data(repeating: 0x00, count: 1000)
     let compressed = try original.lzmaCompressed()
     let decompressed = try compressed.lzmaDecompressed()
@@ -237,8 +237,8 @@ struct EdgeCaseTests {
     #expect(compressed.count < original.count, "Should compress well")
   }
 
-  @Test("Repeated value: 1000 of 0xFF")
-  func repeatedFF() throws {
+  @Test
+  func `Repeated value: 1000 of 0xFF`() throws {
     let original = Data(repeating: 0xFF, count: 1000)
     let compressed = try original.lzmaCompressed()
     let decompressed = try compressed.lzmaDecompressed()
@@ -247,16 +247,16 @@ struct EdgeCaseTests {
 
   // MARK: - Miscellaneous Edge Cases
 
-  @Test("Two bytes: minimum multi-byte data")
-  func twoBytes() throws {
+  @Test
+  func `Two bytes: minimum multi-byte data`() throws {
     let original = Data([0x01, 0x02])
     let compressed = try original.lzmaCompressed()
     let decompressed = try compressed.lzmaDecompressed()
     #expect(decompressed == original)
   }
 
-  @Test("Exact buffer multiple: data is exact multiple of buffer size")
-  func exactBufferMultiple() throws {
+  @Test
+  func `Exact buffer multiple: data is exact multiple of buffer size`() throws {
     let config = LZMAConfiguration.compact  // 16KB buffer
     let bufferSize = config.bufferSize.bytes
     let original = Data((0..<(bufferSize * 3)).map { UInt8($0 & 0xFF) })

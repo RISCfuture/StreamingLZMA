@@ -2,12 +2,12 @@ import Testing
 import Foundation
 @testable import StreamingLZMA
 
-@Suite("Corruption Handling Tests")
-struct CorruptionHandlingTests {
+@Suite
+struct `Corruption Handling Tests` {
   // MARK: - Truncation Tests
 
-  @Test("Truncation: remove last byte fails decompression")
-  func truncationRemoveLastByte() throws {
+  @Test
+  func `Truncation: remove last byte fails decompression`() throws {
     let original = Data("Hello, LZMA compression test data for truncation testing!".utf8)
     let compressed = try original.lzmaCompressed()
 
@@ -18,8 +18,8 @@ struct CorruptionHandlingTests {
     }
   }
 
-  @Test("Truncation: remove last 10 bytes fails decompression")
-  func truncationRemoveLast10Bytes() throws {
+  @Test
+  func `Truncation: remove last 10 bytes fails decompression`() throws {
     let original = Data((0..<1000).map { UInt8($0 & 0xFF) })
     let compressed = try original.lzmaCompressed()
 
@@ -30,8 +30,8 @@ struct CorruptionHandlingTests {
     }
   }
 
-  @Test("Truncation: truncate to half fails decompression")
-  func truncationToHalf() throws {
+  @Test
+  func `Truncation: truncate to half fails decompression`() throws {
     let original = Data((0..<10000).map { UInt8($0 & 0xFF) })
     let compressed = try original.lzmaCompressed()
 
@@ -44,8 +44,8 @@ struct CorruptionHandlingTests {
 
   // MARK: - Bit Flip Tests
 
-  @Test("Bit flip: single bit corruption causes error or wrong output")
-  func singleBitFlip() throws {
+  @Test
+  func `Bit flip: single bit corruption causes error or wrong output`() throws {
     let original = Data("Test data for single bit flip corruption testing.".utf8)
     let compressed = try original.lzmaCompressed()
 
@@ -65,8 +65,8 @@ struct CorruptionHandlingTests {
     }
   }
 
-  @Test("Bit flip: corruption at start of data")
-  func bitFlipAtStart() throws {
+  @Test
+  func `Bit flip: corruption at start of data`() throws {
     let original = Data((0..<500).map { UInt8($0 & 0xFF) })
     let compressed = try original.lzmaCompressed()
 
@@ -78,8 +78,8 @@ struct CorruptionHandlingTests {
     }
   }
 
-  @Test("Bit flip: corruption at end of data")
-  func bitFlipAtEnd() throws {
+  @Test
+  func `Bit flip: corruption at end of data`() throws {
     let original = Data((0..<500).map { UInt8($0 & 0xFF) })
     let compressed = try original.lzmaCompressed()
 
@@ -91,8 +91,8 @@ struct CorruptionHandlingTests {
     }
   }
 
-  @Test("Byte replacement: corruption in middle")
-  func byteReplacementMiddle() throws {
+  @Test
+  func `Byte replacement: corruption in middle`() throws {
     let original = Data((0..<1000).map { UInt8($0 & 0xFF) })
     let compressed = try original.lzmaCompressed()
 
@@ -109,8 +109,8 @@ struct CorruptionHandlingTests {
 
   // MARK: - Random Garbage Tests
 
-  @Test("Random garbage data fails decompression")
-  func randomGarbageFails() {
+  @Test
+  func `Random garbage data fails decompression`() {
     let garbage = randomData(count: 100)
 
     #expect(throws: LZMAError.corruptedData) {
@@ -118,8 +118,8 @@ struct CorruptionHandlingTests {
     }
   }
 
-  @Test("Completely random large data fails decompression")
-  func randomLargeGarbageFails() {
+  @Test
+  func `Completely random large data fails decompression`() {
     let garbage = randomData(count: 10000)
 
     #expect(throws: LZMAError.corruptedData) {
@@ -129,8 +129,8 @@ struct CorruptionHandlingTests {
 
   // MARK: - File Format Corruption Tests
 
-  @Test("File format: Apple ignores properties byte (behavioral test)")
-  func fileFormatPropertiesByteIgnored() throws {
+  @Test
+  func `File format: Apple ignores properties byte (behavioral test)`() throws {
     let original = Data("Test data for file format properties.".utf8)
     let compressed = try original.lzmaFileCompressed()
 
@@ -143,8 +143,8 @@ struct CorruptionHandlingTests {
     #expect(decompressed == original, "Apple ignores properties byte, decompression should succeed")
   }
 
-  @Test("File format: truncated header")
-  func fileFormatTruncatedHeader() {
+  @Test
+  func `File format: truncated header`() {
     // Header should be 13 bytes - provide only 5
     let truncatedHeader = Data([0x5D, 0x00, 0x00, 0x80, 0x00])
 
@@ -153,8 +153,8 @@ struct CorruptionHandlingTests {
     }
   }
 
-  @Test("File format: valid header but corrupted stream")
-  func fileFormatValidHeaderCorruptedStream() throws {
+  @Test
+  func `File format: valid header but corrupted stream`() throws {
     let original = Data("Test data with valid header but corrupted stream.".utf8)
     let compressed = try original.lzmaFileCompressed()
 
@@ -168,8 +168,8 @@ struct CorruptionHandlingTests {
 
   // MARK: - Streaming Corruption Detection Tests
 
-  @Test("Streaming: corruption detected during chunked decompression")
-  func streamingCorruptionDetection() async throws {
+  @Test
+  func `Streaming: corruption detected during chunked decompression`() async throws {
     let original = Data((0..<10000).map { UInt8($0 & 0xFF) })
     let compressed = try original.lzmaCompressed()
 
@@ -182,8 +182,8 @@ struct CorruptionHandlingTests {
     }
   }
 
-  @Test("Streaming: truncation detected during chunked decompression")
-  func streamingTruncationDetection() async throws {
+  @Test
+  func `Streaming: truncation detected during chunked decompression`() async throws {
     let original = Data((0..<10000).map { UInt8($0 & 0xFF) })
     let compressed = try original.lzmaCompressed()
 

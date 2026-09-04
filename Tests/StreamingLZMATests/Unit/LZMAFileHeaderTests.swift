@@ -2,17 +2,17 @@ import Foundation
 import Testing
 @testable import StreamingLZMA
 
-@Suite("LZMAFileHeader Tests")
-struct LZMAFileHeaderTests {
-  @Test("Header encodes to 13 bytes")
-  func headerEncodesTo13Bytes() {
+@Suite
+struct `LZMAFileHeader Tests` {
+  @Test
+  func `Header encodes to 13 bytes`() {
     let header = LZMAFileHeader.default
     let encoded = header.encoded()
     #expect(encoded.count == 13)
   }
 
-  @Test("Header round-trips through encoding")
-  func headerRoundTrip() throws {
+  @Test
+  func `Header round-trips through encoding`() throws {
     let original = LZMAFileHeader(
       properties: 0x5D,
       dictionarySize: 4_194_304,
@@ -27,16 +27,16 @@ struct LZMAFileHeaderTests {
     #expect(decoded.uncompressedSize == original.uncompressedSize)
   }
 
-  @Test("Parsing short data throws corruptedData")
-  func parseShortDataThrows() {
+  @Test
+  func `Parsing short data throws corruptedData`() {
     let shortData = Data([0x5D, 0x00])
     #expect(throws: LZMAError.corruptedData) {
       try LZMAFileHeader(from: shortData)
     }
   }
 
-  @Test("Properties decode correctly")
-  func propertiesDecode() {
+  @Test
+  func `Properties decode correctly`() {
     // 0x5D = 93 = 2*45 + 0*9 + 3 -> pb=2, lp=0, lc=3
     let header = LZMAFileHeader.default
     let (lc, lp, pb) = header.decodedProperties
@@ -45,8 +45,8 @@ struct LZMAFileHeaderTests {
     #expect(pb == 2)
   }
 
-  @Test("Encoded header has correct byte order")
-  func encodedHeaderByteOrder() {
+  @Test
+  func `Encoded header has correct byte order`() {
     let header = LZMAFileHeader(
       properties: 0x5D,
       dictionarySize: 0x00800000,  // 8 MB

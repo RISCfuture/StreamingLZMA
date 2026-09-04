@@ -14,8 +14,8 @@ import Foundation
 ///
 /// For CLI interoperability, consider using XZ format (which Apple also supports via
 /// COMPRESSION_LZMA) or ZSTD as alternatives.
-@Suite("CLI Compatibility Tests")
-struct CLICompatibilityTests {
+@Suite
+struct `CLI Compatibility Tests` {
   // MARK: - Fixture Loading
 
   private func fixtureURL(_ name: String) -> URL? {
@@ -24,8 +24,8 @@ struct CLICompatibilityTests {
 
   // MARK: - Header Structure Tests
 
-  @Test("Parse header from CLI-compressed file")
-  func parseCLIHeader() throws {
+  @Test
+  func `Parse header from CLI-compressed file`() throws {
     let compressedURL = try #require(fixtureURL("sample.txt.lzma"))
 
     let compressed = try Data(contentsOf: compressedURL)
@@ -44,8 +44,8 @@ struct CLICompatibilityTests {
     #expect(pb == 2)
   }
 
-  @Test("CLI file has known uncompressed size in header")
-  func cliHeaderHasKnownSize() throws {
+  @Test
+  func `CLI file has known uncompressed size in header`() throws {
     let compressedURL = try #require(fixtureURL("sample.txt.lzma"))
 
     let compressed = try Data(contentsOf: compressedURL)
@@ -58,16 +58,16 @@ struct CLICompatibilityTests {
 
   // MARK: - Library Format Tests
 
-  @Test("Library file format round-trip")
-  func libraryFileFormatRoundTrip() throws {
+  @Test
+  func `Library file format round-trip`() throws {
     let original = Data("Hello, LZMA file format!".utf8)
     let compressed = try original.lzmaFileCompressed()
     let decompressed = try compressed.lzmaFileDecompressed()
     #expect(decompressed == original)
   }
 
-  @Test("Library file format header is correct")
-  func libraryFileFormatHeader() throws {
+  @Test
+  func `Library file format header is correct`() throws {
     let original = Data("Test".utf8)
     let compressed = try original.lzmaFileCompressed()
     let header = try LZMAFileHeader(from: compressed)
@@ -77,8 +77,8 @@ struct CLICompatibilityTests {
     #expect(header.uncompressedSize == UInt64(original.count))
   }
 
-  @Test("Library FileHandle format round-trip")
-  func libraryFileHandleFormatRoundTrip() throws {
+  @Test
+  func `Library FileHandle format round-trip`() throws {
     let original = Data((0..<1000).map { UInt8($0 & 0xFF) })
 
     let tempDir = FileManager.default.temporaryDirectory
@@ -117,8 +117,8 @@ struct CLICompatibilityTests {
 
   // MARK: - Format Compatibility Notes
 
-  @Test("Document Apple vs CLI format difference")
-  func formatDifferenceDocumented() throws {
+  @Test
+  func `Document Apple vs CLI format difference`() throws {
     // This test documents that Apple's Compression framework produces
     // different raw LZMA data than the standalone LZMA SDK.
     //

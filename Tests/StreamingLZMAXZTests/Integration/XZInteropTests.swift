@@ -6,28 +6,28 @@ import Testing
 // This file tests interoperability with NSData compression methods,
 // which requires using NSData type conversions.
 
-@Suite("XZ Interoperability Tests")
-struct XZInteropTests {
+@Suite
+struct `XZ Interoperability Tests` {
   // MARK: - NSData Interoperability
 
-  @Test("Decompress NSData.compressed output")
-  func decompressNSDataOutput() throws {
+  @Test
+  func `Decompress NSData.compressed output`() throws {
     let original = Data("Test data for NSData interop".utf8)
     let compressed = try (original as NSData).compressed(using: .lzma) as Data
     let decompressed = try compressed.xzDecompressed()
     #expect(decompressed == original)
   }
 
-  @Test("NSData can decompress our compressed output")
-  func nsDataCanDecompressOurs() throws {
+  @Test
+  func `NSData can decompress our compressed output`() throws {
     let original = Data("Test data that NSData should be able to decompress".utf8)
     let compressed = try original.xzCompressed()
     let decompressed = try (compressed as NSData).decompressed(using: .lzma) as Data
     #expect(decompressed == original)
   }
 
-  @Test("Round-trip with NSData")
-  func roundTripWithNSData() throws {
+  @Test
+  func `Round-trip with NSData`() throws {
     let original = Data("Round trip test between our library and NSData".utf8)
 
     // Compress with our library, decompress with NSData
@@ -41,8 +41,8 @@ struct XZInteropTests {
     #expect(ourDecompressed == original)
   }
 
-  @Test("Large data NSData interop")
-  func largeDataNSDataInterop() throws {
+  @Test
+  func `Large data NSData interop`() throws {
     let original = Data((0..<100_000).map { UInt8($0 & 0xFF) })
 
     // Our compression, NSData decompression
@@ -56,8 +56,8 @@ struct XZInteropTests {
     #expect(ourDecompressed == original)
   }
 
-  @Test("Binary data NSData interop")
-  func binaryDataNSDataInterop() throws {
+  @Test
+  func `Binary data NSData interop`() throws {
     // Test with all byte values
     var original = Data()
     for i in 0..<256 {
@@ -72,8 +72,8 @@ struct XZInteropTests {
 
   // MARK: - CLI Interoperability
 
-  @Test("Our compression is readable by xz CLI")
-  func cliCanDecompress() throws {
+  @Test
+  func `Our compression is readable by xz CLI`() throws {
     // Skip if xz is not available
     let checkResult = try? runCommand("which", "xz")
     guard checkResult != nil else {
@@ -106,8 +106,8 @@ struct XZInteropTests {
     #expect(decompressed == original)
   }
 
-  @Test("xz CLI output is readable by our library")
-  func canDecompressCLIOutput() throws {
+  @Test
+  func `xz CLI output is readable by our library`() throws {
     // Skip if xz is not available
     let checkResult = try? runCommand("which", "xz")
     guard checkResult != nil else {
@@ -137,8 +137,8 @@ struct XZInteropTests {
 
   // MARK: - Different XZ Options
 
-  @Test("Different presets produce compatible output")
-  func differentPresetsCompatible() throws {
+  @Test
+  func `Different presets produce compatible output`() throws {
     let original = Data("Test data for preset compatibility".utf8)
 
     for preset: UInt32 in [0, 3, 6, 9] {
@@ -155,8 +155,8 @@ struct XZInteropTests {
     }
   }
 
-  @Test("Different check types produce compatible output")
-  func differentCheckTypesCompatible() throws {
+  @Test
+  func `Different check types produce compatible output`() throws {
     let original = Data("Test data for check type compatibility".utf8)
 
     for checkType: XZConfiguration.Check in [.none, .crc32, .crc64, .sha256] {
@@ -175,8 +175,8 @@ struct XZInteropTests {
 
   // MARK: - XZ Format Validation
 
-  @Test("XZ magic bytes are correct")
-  func xzMagicBytes() throws {
+  @Test
+  func `XZ magic bytes are correct`() throws {
     let original = Data("Test".utf8)
     let compressed = try original.xzCompressed()
 
@@ -192,8 +192,8 @@ struct XZInteropTests {
 
   // MARK: - Streaming Interop
 
-  @Test("Streaming compression compatible with NSData")
-  func streamingCompressionNSDataCompatible() async throws {
+  @Test
+  func `Streaming compression compatible with NSData`() async throws {
     let original = Data("Streaming compression test for NSData compatibility".utf8)
 
     let compressor = try XZCompressor()
@@ -205,8 +205,8 @@ struct XZInteropTests {
     #expect(nsDecompressed == original)
   }
 
-  @Test("Streaming decompression handles NSData compressed input")
-  func streamingDecompressionNSDataInput() async throws {
+  @Test
+  func `Streaming decompression handles NSData compressed input`() async throws {
     let original = Data("Streaming decompression test with NSData input".utf8)
     let compressed = try (original as NSData).compressed(using: .lzma) as Data
 

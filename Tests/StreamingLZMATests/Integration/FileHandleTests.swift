@@ -2,10 +2,10 @@ import Testing
 import Foundation
 @testable import StreamingLZMA
 
-@Suite("FileHandle Extension Tests")
-struct FileHandleTests {
-  @Test("FileHandle compression round-trip")
-  func fileHandleRoundTrip() throws {
+@Suite
+struct `FileHandle Extension Tests` {
+  @Test
+  func `FileHandle compression round-trip`() throws {
     let original = Data((0..<10000).map { UInt8($0 & 0xFF) })
 
     let tempDir = FileManager.default.temporaryDirectory
@@ -49,8 +49,8 @@ struct FileHandleTests {
     #expect(decompressed == original)
   }
 
-  @Test("FileHandle file format round-trip")
-  func fileHandleFileFormatRoundTrip() throws {
+  @Test
+  func `FileHandle file format round-trip`() throws {
     let original = Data("Hello, FileHandle LZMA file format!".utf8)
 
     let tempDir = FileManager.default.temporaryDirectory
@@ -94,8 +94,8 @@ struct FileHandleTests {
     #expect(decompressed == original)
   }
 
-  @Test("FileHandle progress callback is called")
-  func fileHandleProgressCallback() throws {
+  @Test
+  func `FileHandle progress callback is called`() throws {
     let original = Data((0..<100000).map { UInt8($0 & 0xFF) })
 
     let tempDir = FileManager.default.temporaryDirectory

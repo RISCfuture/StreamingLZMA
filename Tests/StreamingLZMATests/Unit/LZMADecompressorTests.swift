@@ -2,10 +2,10 @@ import Foundation
 import Testing
 @testable import StreamingLZMA
 
-@Suite("LZMADecompressor Tests")
-struct LZMADecompressorTests {
-  @Test("Decompressor can be reset")
-  func decompressorReset() async throws {
+@Suite
+struct `LZMADecompressor Tests` {
+  @Test
+  func `Decompressor can be reset`() async throws {
     let decompressor = try LZMADecompressor()
 
     // First use (with valid compressed data)
@@ -22,8 +22,8 @@ struct LZMADecompressorTests {
     _ = try await decompressor.finalize()
   }
 
-  @Test("Decompressor throws when processing after finalize")
-  func decompressorThrowsAfterFinalize() async throws {
+  @Test
+  func `Decompressor throws when processing after finalize`() async throws {
     let decompressor = try LZMADecompressor()
     let input = Data("Hello".utf8)
     let compressed = try input.lzmaCompressed()
@@ -36,8 +36,8 @@ struct LZMADecompressorTests {
     }
   }
 
-  @Test("Decompressor throws when finalizing twice")
-  func decompressorThrowsOnDoubleFinalize() async throws {
+  @Test
+  func `Decompressor throws when finalizing twice`() async throws {
     let decompressor = try LZMADecompressor()
     let input = Data("Hello".utf8)
     let compressed = try input.lzmaCompressed()
