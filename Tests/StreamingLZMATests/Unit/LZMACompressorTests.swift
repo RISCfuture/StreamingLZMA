@@ -2,10 +2,10 @@ import Foundation
 import Testing
 @testable import StreamingLZMA
 
-@Suite("LZMACompressor Tests")
-struct LZMACompressorTests {
-  @Test("Compressor can be reset")
-  func compressorReset() async throws {
+@Suite
+struct `LZMACompressor Tests` {
+  @Test
+  func `Compressor can be reset`() async throws {
     let compressor = try LZMACompressor()
     let input = Data("Hello".utf8)
 
@@ -19,8 +19,8 @@ struct LZMACompressorTests {
     _ = try await compressor.finalize()
   }
 
-  @Test("Compressor throws when processing after finalize")
-  func compressorThrowsAfterFinalize() async throws {
+  @Test
+  func `Compressor throws when processing after finalize`() async throws {
     let compressor = try LZMACompressor()
     let input = Data("Hello".utf8)
 
@@ -33,8 +33,8 @@ struct LZMACompressorTests {
     }
   }
 
-  @Test("Compressor throws when finalizing twice")
-  func compressorThrowsOnDoubleFinalize() async throws {
+  @Test
+  func `Compressor throws when finalizing twice`() async throws {
     let compressor = try LZMACompressor()
     let input = Data("Hello".utf8)
 

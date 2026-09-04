@@ -2,12 +2,12 @@ import Foundation
 import Testing
 @testable import StreamingLZMAXZ
 
-@Suite("XZ AsyncSequence Tests")
-struct XZAsyncSequenceTests {
+@Suite
+struct `XZ AsyncSequence Tests` {
   // MARK: - AsyncSequence<Data> Tests
 
-  @Test("AsyncSequence<Data> compression")
-  func asyncSequenceDataCompression() async throws {
+  @Test
+  func `AsyncSequence<Data> compression`() async throws {
     let original = Data("Test data for async sequence compression.".utf8)
 
     let stream = AsyncStream<Data> { continuation in
@@ -24,8 +24,8 @@ struct XZAsyncSequenceTests {
     #expect(decompressed == original)
   }
 
-  @Test("AsyncSequence<Data> decompression")
-  func asyncSequenceDataDecompression() async throws {
+  @Test
+  func `AsyncSequence<Data> decompression`() async throws {
     let original = Data("Test data for async sequence decompression.".utf8)
     let compressed = try original.xzCompressed()
 
@@ -42,8 +42,8 @@ struct XZAsyncSequenceTests {
     #expect(decompressed == original)
   }
 
-  @Test("AsyncSequence<Data> with multiple chunks")
-  func asyncSequenceDataMultipleChunks() async throws {
+  @Test
+  func `AsyncSequence<Data> with multiple chunks`() async throws {
     let part1 = Data("First part ".utf8)
     let part2 = Data("Second part ".utf8)
     let part3 = Data("Third part".utf8)
@@ -67,8 +67,8 @@ struct XZAsyncSequenceTests {
 
   // MARK: - AsyncSequence<UInt8> Tests
 
-  @Test("AsyncSequence<UInt8> compression")
-  func asyncSequenceBytesCompression() async throws {
+  @Test
+  func `AsyncSequence<UInt8> compression`() async throws {
     let original = Data("Test data for byte sequence compression.".utf8)
 
     let stream = AsyncStream<UInt8> { continuation in
@@ -87,8 +87,8 @@ struct XZAsyncSequenceTests {
     #expect(decompressed == original)
   }
 
-  @Test("AsyncSequence<UInt8> decompression")
-  func asyncSequenceBytesDecompression() async throws {
+  @Test
+  func `AsyncSequence<UInt8> decompression`() async throws {
     let original = Data("Test data for byte sequence decompression.".utf8)
     let compressed = try original.xzCompressed()
 
@@ -109,8 +109,8 @@ struct XZAsyncSequenceTests {
 
   // MARK: - Round-Trip Tests
 
-  @Test("AsyncSequence<Data> round-trip")
-  func asyncSequenceDataRoundTrip() async throws {
+  @Test
+  func `AsyncSequence<Data> round-trip`() async throws {
     let original = Data((0..<10000).map { UInt8($0 & 0xFF) })
 
     // Compress
@@ -145,8 +145,8 @@ struct XZAsyncSequenceTests {
     #expect(decompressed == original)
   }
 
-  @Test("AsyncSequence<UInt8> round-trip")
-  func asyncSequenceBytesRoundTrip() async throws {
+  @Test
+  func `AsyncSequence<UInt8> round-trip`() async throws {
     let original = Data("Round trip test for byte sequences.".utf8)
 
     // Compress
@@ -180,8 +180,8 @@ struct XZAsyncSequenceTests {
 
   // MARK: - Configuration Tests
 
-  @Test("AsyncSequence with compact configuration")
-  func asyncSequenceCompactConfig() async throws {
+  @Test
+  func `AsyncSequence with compact configuration`() async throws {
     let original = Data("Test with compact configuration.".utf8)
 
     let stream = AsyncStream<Data> { continuation in
@@ -198,8 +198,8 @@ struct XZAsyncSequenceTests {
     #expect(decompressed == original)
   }
 
-  @Test("AsyncSequence with fast preset")
-  func asyncSequenceFastPreset() async throws {
+  @Test
+  func `AsyncSequence with fast preset`() async throws {
     let original = Data("Test with fast preset.".utf8)
 
     let stream = AsyncStream<Data> { continuation in
@@ -218,8 +218,8 @@ struct XZAsyncSequenceTests {
 
   // MARK: - Empty Data Tests
 
-  @Test("AsyncSequence<Data> empty stream")
-  func asyncSequenceEmptyStream() async throws {
+  @Test
+  func `AsyncSequence<Data> empty stream`() async throws {
     let stream = AsyncStream<Data> { continuation in
       continuation.finish()
     }
@@ -233,8 +233,8 @@ struct XZAsyncSequenceTests {
     #expect(!compressed.isEmpty)
   }
 
-  @Test("AsyncSequence<Data> with empty chunks")
-  func asyncSequenceEmptyChunks() async throws {
+  @Test
+  func `AsyncSequence<Data> with empty chunks`() async throws {
     let original = Data("Data with empty chunks.".utf8)
 
     let stream = AsyncStream<Data> { continuation in

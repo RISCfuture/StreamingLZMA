@@ -2,12 +2,12 @@ import Testing
 import Foundation
 @testable import StreamingLZMA
 
-@Suite("AsyncSequence Extension Tests")
-struct AsyncSequenceTests {
+@Suite
+struct `AsyncSequence Extension Tests` {
   // MARK: - Element == Data Tests
 
-  @Test("AsyncSequence<Data> compression")
-  func asyncSequenceDataCompression() async throws {
+  @Test
+  func `AsyncSequence<Data> compression`() async throws {
     let chunks = [
       Data("Hello, ".utf8),
       Data("async ".utf8),
@@ -31,8 +31,8 @@ struct AsyncSequenceTests {
     #expect(decompressed == original)
   }
 
-  @Test("AsyncSequence<Data> decompression")
-  func asyncSequenceDataDecompression() async throws {
+  @Test
+  func `AsyncSequence<Data> decompression`() async throws {
     let original = Data("Hello, async sequence decompression!".utf8)
     let compressed = try original.lzmaCompressed()
 
@@ -63,8 +63,8 @@ struct AsyncSequenceTests {
 
   // MARK: - Element == UInt8 Tests
 
-  @Test("AsyncSequence<UInt8> compression")
-  func asyncSequenceByteCompression() async throws {
+  @Test
+  func `AsyncSequence<UInt8> compression`() async throws {
     let original = Data("Hello, byte stream!".utf8)
 
     let stream = AsyncStream<UInt8> { continuation in
@@ -83,8 +83,8 @@ struct AsyncSequenceTests {
     #expect(decompressed == original)
   }
 
-  @Test("AsyncSequence<UInt8> decompression")
-  func asyncSequenceByteDecompression() async throws {
+  @Test
+  func `AsyncSequence<UInt8> decompression`() async throws {
     let original = Data("Hello, byte decompression!".utf8)
     let compressed = try original.lzmaCompressed()
 
@@ -105,8 +105,8 @@ struct AsyncSequenceTests {
 
   // MARK: - Configuration Tests
 
-  @Test("AsyncSequence with custom configuration")
-  func asyncSequenceCustomConfig() async throws {
+  @Test
+  func `AsyncSequence with custom configuration`() async throws {
     let original = Data("Custom config test".utf8)
     let config = LZMAConfiguration(bufferSize: .custom(1024))
 
@@ -126,8 +126,8 @@ struct AsyncSequenceTests {
 
   // MARK: - Round-Trip Tests
 
-  @Test("Full async round-trip")
-  func fullAsyncRoundTrip() async throws {
+  @Test
+  func `Full async round-trip`() async throws {
     let original = Data((0..<5000).map { UInt8($0 & 0xFF) })
 
     // Compress

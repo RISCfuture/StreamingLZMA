@@ -2,8 +2,8 @@ import Testing
 import Foundation
 @testable import StreamingLZMA
 
-@Suite("Cross-API Compatibility Tests")
-struct CrossAPICompatibilityTests {
+@Suite
+struct `Cross-API Compatibility Tests` {
   // MARK: - Raw Stream API Matrix Tests
 
   /// All raw stream APIs (non-file-format) that should interoperate
@@ -22,8 +22,8 @@ struct CrossAPICompatibilityTests {
     .fileHandleFile
   ]
 
-  @Test("Raw stream APIs: full compatibility matrix with small data")
-  func rawStreamMatrixSmall() async throws {
+  @Test
+  func `Raw stream APIs: full compatibility matrix with small data`() async throws {
     let original = Data("Hello, cross-API compatibility test!".utf8)
 
     for compressAPI in Self.rawStreamAPIs {
@@ -39,8 +39,8 @@ struct CrossAPICompatibilityTests {
     }
   }
 
-  @Test("Raw stream APIs: full compatibility matrix with medium data")
-  func rawStreamMatrixMedium() async throws {
+  @Test
+  func `Raw stream APIs: full compatibility matrix with medium data`() async throws {
     let original = Data((0..<10000).map { UInt8($0 & 0xFF) })
 
     for compressAPI in Self.rawStreamAPIs {
@@ -56,8 +56,8 @@ struct CrossAPICompatibilityTests {
     }
   }
 
-  @Test("File format APIs: compatibility matrix")
-  func fileFormatMatrix() async throws {
+  @Test
+  func `File format APIs: compatibility matrix`() async throws {
     let original = Data("File format compatibility test data.".utf8)
 
     for compressAPI in Self.fileFormatAPIs {
@@ -75,23 +75,23 @@ struct CrossAPICompatibilityTests {
 
   // MARK: - Size Variations Across APIs
 
-  @Test("Size variations: 100 bytes across all raw APIs")
-  func sizeVariations100B() async throws {
+  @Test
+  func `Size variations: 100 bytes across all raw APIs`() async throws {
     try await verifySizeAcrossAPIs(size: 100)
   }
 
-  @Test("Size variations: 1KB across all raw APIs")
-  func sizeVariations1KB() async throws {
+  @Test
+  func `Size variations: 1KB across all raw APIs`() async throws {
     try await verifySizeAcrossAPIs(size: 1024)
   }
 
-  @Test("Size variations: 10KB across all raw APIs")
-  func sizeVariations10KB() async throws {
+  @Test
+  func `Size variations: 10KB across all raw APIs`() async throws {
     try await verifySizeAcrossAPIs(size: 10 * 1024)
   }
 
-  @Test("Size variations: 100KB across all raw APIs")
-  func sizeVariations100KB() async throws {
+  @Test
+  func `Size variations: 100KB across all raw APIs`() async throws {
     try await verifySizeAcrossAPIs(size: 100 * 1024)
   }
 
@@ -107,8 +107,8 @@ struct CrossAPICompatibilityTests {
 
   // MARK: - Specific API Pair Tests
 
-  @Test("Specific pair: Data extension -> FileHandle")
-  func dataToFileHandle() async throws {
+  @Test
+  func `Specific pair: Data extension -> FileHandle`() async throws {
     let original = Data((0..<5000).map { UInt8($0 & 0xFF) })
 
     let compressed = try await compress(data: original, using: .dataExtension)
@@ -117,8 +117,8 @@ struct CrossAPICompatibilityTests {
     #expect(decompressed == original)
   }
 
-  @Test("Specific pair: FileHandle -> Data extension")
-  func fileHandleToData() async throws {
+  @Test
+  func `Specific pair: FileHandle -> Data extension`() async throws {
     let original = Data((0..<5000).map { UInt8($0 & 0xFF) })
 
     let compressed = try await compress(data: original, using: .fileHandle)
@@ -127,8 +127,8 @@ struct CrossAPICompatibilityTests {
     #expect(decompressed == original)
   }
 
-  @Test("Specific pair: InputStream -> AsyncSequence<Data>")
-  func inputStreamToAsyncData() async throws {
+  @Test
+  func `Specific pair: InputStream -> AsyncSequence<Data>`() async throws {
     let original = Data((0..<5000).map { UInt8($0 & 0xFF) })
 
     let compressed = try await compress(data: original, using: .inputStream)
@@ -137,8 +137,8 @@ struct CrossAPICompatibilityTests {
     #expect(decompressed == original)
   }
 
-  @Test("Specific pair: AsyncSequence<UInt8> -> Streaming Compressor")
-  func asyncBytesToStreaming() async throws {
+  @Test
+  func `Specific pair: AsyncSequence<UInt8> -> Streaming Compressor`() async throws {
     let original = Data((0..<5000).map { UInt8($0 & 0xFF) })
 
     let compressed = try await compress(data: original, using: .asyncSequenceBytes)
@@ -147,8 +147,8 @@ struct CrossAPICompatibilityTests {
     #expect(decompressed == original)
   }
 
-  @Test("Specific pair: Streaming Compressor -> InputStream")
-  func streamingToInputStream() async throws {
+  @Test
+  func `Specific pair: Streaming Compressor -> InputStream`() async throws {
     let original = Data((0..<5000).map { UInt8($0 & 0xFF) })
 
     let compressed = try await compress(data: original, using: .streamingCompressor)
@@ -157,8 +157,8 @@ struct CrossAPICompatibilityTests {
     #expect(decompressed == original)
   }
 
-  @Test("Specific pair: File format Data -> FileHandle")
-  func fileFormatDataToFileHandle() async throws {
+  @Test
+  func `Specific pair: File format Data -> FileHandle`() async throws {
     let original = Data("File format cross-API test.".utf8)
 
     let compressed = try await compress(data: original, using: .dataExtensionFile)
@@ -167,8 +167,8 @@ struct CrossAPICompatibilityTests {
     #expect(decompressed == original)
   }
 
-  @Test("Specific pair: File format FileHandle -> Data")
-  func fileFormatFileHandleToData() async throws {
+  @Test
+  func `Specific pair: File format FileHandle -> Data`() async throws {
     let original = Data("Reverse file format cross-API test.".utf8)
 
     let compressed = try await compress(data: original, using: .fileHandleFile)
@@ -179,8 +179,8 @@ struct CrossAPICompatibilityTests {
 
   // MARK: - Configuration Independence
 
-  @Test("Configuration: compress with small buffer, decompress with large")
-  func configSmallToLarge() async throws {
+  @Test
+  func `Configuration: compress with small buffer, decompress with large`() async throws {
     let original = Data((0..<50000).map { UInt8($0 & 0xFF) })
 
     let compressed = try await compress(
@@ -197,8 +197,8 @@ struct CrossAPICompatibilityTests {
     #expect(decompressed == original)
   }
 
-  @Test("Configuration: compress with large buffer, decompress with small")
-  func configLargeToSmall() async throws {
+  @Test
+  func `Configuration: compress with large buffer, decompress with small`() async throws {
     let original = Data((0..<50000).map { UInt8($0 & 0xFF) })
 
     let compressed = try await compress(
@@ -215,8 +215,8 @@ struct CrossAPICompatibilityTests {
     #expect(decompressed == original)
   }
 
-  @Test("Configuration: mixed APIs with different configs")
-  func configMixedAPIs() async throws {
+  @Test
+  func `Configuration: mixed APIs with different configs`() async throws {
     let original = Data((0..<20000).map { UInt8($0 & 0xFF) })
 
     // Compress with streaming using small buffer
@@ -238,8 +238,8 @@ struct CrossAPICompatibilityTests {
 
   // MARK: - Concurrent API Usage
 
-  @Test("Concurrent: multiple APIs compressing same data simultaneously")
-  func concurrentCompression() async throws {
+  @Test
+  func `Concurrent: multiple APIs compressing same data simultaneously`() async throws {
     let original = Data((0..<5000).map { UInt8($0 & 0xFF) })
 
     // Compress with multiple APIs concurrently
@@ -259,8 +259,8 @@ struct CrossAPICompatibilityTests {
     #expect(d3 == original)
   }
 
-  @Test("Concurrent: different data through different APIs")
-  func concurrentDifferentData() async throws {
+  @Test
+  func `Concurrent: different data through different APIs`() async throws {
     let data1 = Data("First piece of data".utf8)
     let data2 = Data("Second piece of data".utf8)
     let data3 = Data("Third piece of data".utf8)

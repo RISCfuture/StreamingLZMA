@@ -2,12 +2,12 @@ import Testing
 import Foundation
 @testable import StreamingLZMA
 
-@Suite("Property-Based Tests")
-struct PropertyBasedTests {
+@Suite
+struct `Property-Based Tests` {
   // MARK: - Round-Trip Invariant Tests
 
-  @Test("Property: round-trip preserves data (sizes 1B to 1MB)")
-  func roundTripPreservesData() throws {
+  @Test
+  func `Property: round-trip preserves data (sizes 1B to 1MB)`() throws {
     let sizes = [1, 10, 100, 1000, 10_000, 100_000, 1_000_000]
 
     for size in sizes {
@@ -18,8 +18,8 @@ struct PropertyBasedTests {
     }
   }
 
-  @Test("Property: round-trip with 20 random iterations")
-  func roundTripRandomIterations() throws {
+  @Test
+  func `Property: round-trip with 20 random iterations`() throws {
     for seed in UInt64(1)...20 {
       // Vary size based on seed
       let size = Int(seed * 500 + 100)
@@ -34,8 +34,8 @@ struct PropertyBasedTests {
 
   // MARK: - Determinism Tests
 
-  @Test("Property: compression is deterministic")
-  func compressionIsDeterministic() throws {
+  @Test
+  func `Property: compression is deterministic`() throws {
     let original = Data("Determinism test data that should compress the same way every time.".utf8)
 
     let compressed1 = try original.lzmaCompressed()
@@ -46,8 +46,8 @@ struct PropertyBasedTests {
     #expect(compressed2 == compressed3)
   }
 
-  @Test("Property: streaming compression is deterministic")
-  func streamingCompressionIsDeterministic() async throws {
+  @Test
+  func `Property: streaming compression is deterministic`() async throws {
     let original = Data((0..<5000).map { UInt8($0 & 0xFF) })
 
     // First streaming compression
@@ -65,8 +65,8 @@ struct PropertyBasedTests {
 
   // MARK: - Streaming vs One-Shot Equivalence
 
-  @Test("Property: streaming equals one-shot (single chunk)")
-  func streamingEqualsOneShotSingleChunk() async throws {
+  @Test
+  func `Property: streaming equals one-shot (single chunk)`() async throws {
     let original = Data("Streaming vs one-shot equivalence test.".utf8)
 
     // One-shot
@@ -80,8 +80,8 @@ struct PropertyBasedTests {
     #expect(streaming == oneShot)
   }
 
-  @Test("Property: streaming produces decompressible output regardless of chunking")
-  func streamingChunkingProducesValidOutput() async throws {
+  @Test
+  func `Property: streaming produces decompressible output regardless of chunking`() async throws {
     let original = Data((0..<10000).map { UInt8($0 & 0xFF) })
 
     // Different chunk sizes should all produce data that decompresses to the same result
@@ -96,8 +96,8 @@ struct PropertyBasedTests {
 
   // MARK: - Chunk Size Independence
 
-  @Test("Property: decompression is chunk-size independent")
-  func decompressionChunkSizeIndependent() async throws {
+  @Test
+  func `Property: decompression is chunk-size independent`() async throws {
     let original = Data((0..<10000).map { UInt8($0 & 0xFF) })
     let compressed = try original.lzmaCompressed()
 
@@ -109,8 +109,8 @@ struct PropertyBasedTests {
     }
   }
 
-  @Test("Property: compress chunk size doesn't affect decompressed result")
-  func compressChunkSizeDoesntAffectResult() async throws {
+  @Test
+  func `Property: compress chunk size doesn't affect decompressed result`() async throws {
     let original = Data((0..<5000).map { UInt8($0 & 0xFF) })
 
     // Different compression chunk sizes
@@ -125,8 +125,8 @@ struct PropertyBasedTests {
 
   // MARK: - Configuration Independence
 
-  @Test("Property: different compress configs produce decompressible output")
-  func differentCompressConfigs() throws {
+  @Test
+  func `Property: different compress configs produce decompressible output`() throws {
     let original = Data((0..<20000).map { UInt8($0 & 0xFF) })
     let configs: [LZMAConfiguration] = [.compact, .default, .highThroughput]
 
@@ -144,8 +144,8 @@ struct PropertyBasedTests {
     }
   }
 
-  @Test("Property: custom buffer sizes work correctly")
-  func customBufferSizes() throws {
+  @Test
+  func `Property: custom buffer sizes work correctly`() throws {
     let original = Data((0..<15000).map { UInt8($0 & 0xFF) })
     let customSizes = [1024, 4096, 8192, 32768, 131072]
 
@@ -159,8 +159,8 @@ struct PropertyBasedTests {
 
   // MARK: - Compressor/Decompressor Reuse
 
-  @Test("Property: compressor reuse after reset")
-  func compressorReuseAfterReset() async throws {
+  @Test
+  func `Property: compressor reuse after reset`() async throws {
     let data1 = Data("First data to compress.".utf8)
     let data2 = Data("Second data to compress after reset.".utf8)
     let data3 = Data("Third data to compress after another reset.".utf8)
@@ -188,8 +188,8 @@ struct PropertyBasedTests {
     #expect(decompressed3 == data3)
   }
 
-  @Test("Property: decompressor reuse after reset")
-  func decompressorReuseAfterReset() async throws {
+  @Test
+  func `Property: decompressor reuse after reset`() async throws {
     let data1 = Data("First data".utf8)
     let data2 = Data("Second data after reset".utf8)
 
@@ -212,8 +212,8 @@ struct PropertyBasedTests {
 
   // MARK: - Composition Properties
 
-  @Test("Property: concatenated data compresses correctly")
-  func concatenatedDataCompresses() throws {
+  @Test
+  func `Property: concatenated data compresses correctly`() throws {
     let part1 = Data("First part of the data. ".utf8)
     let part2 = Data("Second part of the data. ".utf8)
     let part3 = Data("Third part of the data.".utf8)
@@ -226,8 +226,8 @@ struct PropertyBasedTests {
     #expect(decompressed == combined)
   }
 
-  @Test("Property: repeated round-trips produce same result")
-  func repeatedRoundTrips() throws {
+  @Test
+  func `Property: repeated round-trips produce same result`() throws {
     var current = Data("Data for repeated round-trip testing.".utf8)
     let original = current
 
@@ -241,8 +241,8 @@ struct PropertyBasedTests {
 
   // MARK: - Boundary Properties
 
-  @Test("Property: data length preserved exactly")
-  func dataLengthPreserved() throws {
+  @Test
+  func `Property: data length preserved exactly`() throws {
     for length in [1, 2, 255, 256, 1023, 1024, 65535, 65536] {
       let original = seededRandomData(count: length, seed: UInt64(length))
       let decompressed = try original.lzmaCompressed().lzmaDecompressed()
@@ -251,8 +251,8 @@ struct PropertyBasedTests {
     }
   }
 
-  @Test("Property: all byte values preserved in round-trip")
-  func allByteValuesPreserved() throws {
+  @Test
+  func `Property: all byte values preserved in round-trip`() throws {
     // Create data containing all possible byte values multiple times
     var data = Data()
     for _ in 0..<100 {
@@ -265,8 +265,8 @@ struct PropertyBasedTests {
 
   // MARK: - Idempotence Properties
 
-  @Test("Property: decompression of already decompressed data fails")
-  func decompressionNotIdempotent() throws {
+  @Test
+  func `Property: decompression of already decompressed data fails`() throws {
     let original = Data("Test data".utf8)
     let decompressed = try original.lzmaCompressed().lzmaDecompressed()
 

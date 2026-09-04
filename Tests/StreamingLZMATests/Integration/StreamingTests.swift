@@ -2,10 +2,10 @@ import Foundation
 import Testing
 @testable import StreamingLZMA
 
-@Suite("Streaming Tests")
-struct StreamingTests {
-  @Test("Streaming compressor produces same result as one-shot")
-  func streamingMatchesOneShot() async throws {
+@Suite
+struct `Streaming Tests` {
+  @Test
+  func `Streaming compressor produces same result as one-shot`() async throws {
     let original = Data("Hello, streaming LZMA compression test!".utf8)
 
     // One-shot
@@ -19,8 +19,8 @@ struct StreamingTests {
     #expect(streamingCompressed == oneShotCompressed)
   }
 
-  @Test("Streaming decompressor produces same result as one-shot")
-  func streamingDecompressMatchesOneShot() async throws {
+  @Test
+  func `Streaming decompressor produces same result as one-shot`() async throws {
     let original = Data("Hello, streaming LZMA decompression test!".utf8)
     let compressed = try original.lzmaCompressed()
 
@@ -36,8 +36,8 @@ struct StreamingTests {
     #expect(streamingDecompressed == original)
   }
 
-  @Test("Chunked streaming compression")
-  func chunkedStreamingCompression() async throws {
+  @Test
+  func `Chunked streaming compression`() async throws {
     let original = Data((0..<10000).map { UInt8($0 & 0xFF) })
 
     // Compress in chunks
@@ -59,8 +59,8 @@ struct StreamingTests {
     #expect(decompressed == original)
   }
 
-  @Test("Chunked streaming decompression")
-  func chunkedStreamingDecompression() async throws {
+  @Test
+  func `Chunked streaming decompression`() async throws {
     let original = Data((0..<10000).map { UInt8($0 & 0xFF) })
     let compressed = try original.lzmaCompressed()
 
@@ -81,8 +81,8 @@ struct StreamingTests {
     #expect(decompressed == original)
   }
 
-  @Test("Multiple streams can run concurrently")
-  func concurrentStreams() async throws {
+  @Test
+  func `Multiple streams can run concurrently`() async throws {
     let data1 = Data("First data stream".utf8)
     let data2 = Data("Second data stream".utf8)
     let data3 = Data("Third data stream".utf8)

@@ -2,10 +2,10 @@ import Foundation
 import Testing
 @testable import StreamingLZMAXZ
 
-@Suite("XZDecompressor Tests")
-struct XZDecompressorTests {
-  @Test("Decompressor processes valid data")
-  func decompressorProcessesData() async throws {
+@Suite
+struct `XZDecompressor Tests` {
+  @Test
+  func `Decompressor processes valid data`() async throws {
     // First compress some data
     let original = Data("Hello, World!".utf8)
     let compressed = try original.xzCompressed()
@@ -18,8 +18,8 @@ struct XZDecompressorTests {
     #expect(decompressed == original)
   }
 
-  @Test("Decompressor can be reset")
-  func decompressorReset() async throws {
+  @Test
+  func `Decompressor can be reset`() async throws {
     let original = Data("Hello".utf8)
     let compressed = try original.xzCompressed()
 
@@ -38,8 +38,8 @@ struct XZDecompressorTests {
     #expect(decompressed == original)
   }
 
-  @Test("Decompressor throws when processing after finalize")
-  func decompressorThrowsAfterFinalize() async throws {
+  @Test
+  func `Decompressor throws when processing after finalize`() async throws {
     let original = Data("Hello".utf8)
     let compressed = try original.xzCompressed()
 
@@ -53,8 +53,8 @@ struct XZDecompressorTests {
     }
   }
 
-  @Test("Decompressor throws when finalizing twice")
-  func decompressorThrowsOnDoubleFinalize() async throws {
+  @Test
+  func `Decompressor throws when finalizing twice`() async throws {
     let original = Data("Hello".utf8)
     let compressed = try original.xzCompressed()
 

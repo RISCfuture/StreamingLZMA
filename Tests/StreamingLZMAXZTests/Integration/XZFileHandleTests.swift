@@ -2,10 +2,10 @@ import Foundation
 import Testing
 @testable import StreamingLZMAXZ
 
-@Suite("XZ FileHandle Tests")
-struct XZFileHandleTests {
-  @Test("Round-trip file compression")
-  func roundTripFileCompression() throws {
+@Suite
+struct `XZ FileHandle Tests` {
+  @Test
+  func `Round-trip file compression`() throws {
     let tempDir = FileManager.default.temporaryDirectory
     let sourceURL = tempDir.appendingPathComponent("xz_source_\(UUID().uuidString).bin")
     let compressedURL = tempDir.appendingPathComponent("xz_compressed_\(UUID().uuidString).xz")
@@ -48,8 +48,8 @@ struct XZFileHandleTests {
     #expect(decompressed == original)
   }
 
-  @Test("Progress callback is called during compression")
-  func progressCallbackCompression() throws {
+  @Test
+  func `Progress callback is called during compression`() throws {
     let tempDir = FileManager.default.temporaryDirectory
     let sourceURL = tempDir.appendingPathComponent("xz_progress_source_\(UUID().uuidString).bin")
     let compressedURL = tempDir.appendingPathComponent(
@@ -85,8 +85,8 @@ struct XZFileHandleTests {
     #expect(lastCompressionProgress == Int64(original.count))
   }
 
-  @Test("Progress callback is called during decompression")
-  func progressCallbackDecompression() throws {
+  @Test
+  func `Progress callback is called during decompression`() throws {
     let tempDir = FileManager.default.temporaryDirectory
     let compressedURL = tempDir.appendingPathComponent(
       "xz_decompress_progress_\(UUID().uuidString).xz"
@@ -129,8 +129,8 @@ struct XZFileHandleTests {
     #expect(decompressed == original)
   }
 
-  @Test("Large file round-trip")
-  func largeFileRoundTrip() throws {
+  @Test
+  func `Large file round-trip`() throws {
     let tempDir = FileManager.default.temporaryDirectory
     let sourceURL = tempDir.appendingPathComponent("xz_large_source_\(UUID().uuidString).bin")
     let compressedURL = tempDir.appendingPathComponent(
@@ -171,8 +171,8 @@ struct XZFileHandleTests {
     #expect(decompressed == original)
   }
 
-  @Test("Different buffer sizes produce same result")
-  func differentBufferSizes() throws {
+  @Test
+  func `Different buffer sizes produce same result`() throws {
     let tempDir = FileManager.default.temporaryDirectory
     let sourceURL = tempDir.appendingPathComponent("xz_buffer_source_\(UUID().uuidString).bin")
     let compressedSmallURL = tempDir.appendingPathComponent(
