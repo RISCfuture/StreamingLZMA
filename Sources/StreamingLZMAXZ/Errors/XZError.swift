@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// Errors that can occur during XZ compression or decompression operations.
 public enum XZError: Error, Sendable, Hashable {

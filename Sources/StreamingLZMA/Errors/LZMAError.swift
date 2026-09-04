@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// Errors that can occur during LZMA compression or decompression operations.
 public enum LZMAError: Error, Sendable, Hashable {

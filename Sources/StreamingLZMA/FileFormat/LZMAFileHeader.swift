@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// LZMA file header for CLI-compatible .lzma files.
 ///

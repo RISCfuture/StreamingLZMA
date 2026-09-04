@@ -3,9 +3,13 @@
 
 import PackageDescription
 
-let approachableConcurrency: [SwiftSetting] = [
+let upcomingFeatures: [SwiftSetting] = [
   .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
-  .enableUpcomingFeature("InferIsolatedConformances")
+  .enableUpcomingFeature("InferIsolatedConformances"),
+  .enableUpcomingFeature("ImmutableWeakCaptures"),
+  .enableUpcomingFeature("MemberImportVisibility"),
+  .enableUpcomingFeature("ExistentialAny"),
+  .enableUpcomingFeature("InternalImportsByDefault")
 ]
 
 let package = Package(
@@ -51,7 +55,7 @@ let package = Package(
       resources: [
         .process("Resources")
       ],
-      swiftSettings: approachableConcurrency
+      swiftSettings: upcomingFeatures
     ),
     .target(
       name: "StreamingLZMAXZ",
@@ -59,7 +63,7 @@ let package = Package(
       resources: [
         .process("Resources")
       ],
-      swiftSettings: approachableConcurrency
+      swiftSettings: upcomingFeatures
     ),
     .executableTarget(
       name: "lzma-tool",
@@ -67,7 +71,7 @@ let package = Package(
         "StreamingLZMA",
         .product(name: "ArgumentParser", package: "swift-argument-parser")
       ],
-      swiftSettings: approachableConcurrency
+      swiftSettings: upcomingFeatures
     ),
     .executableTarget(
       name: "xz-tool",
@@ -75,7 +79,7 @@ let package = Package(
         "StreamingLZMAXZ",
         .product(name: "ArgumentParser", package: "swift-argument-parser")
       ],
-      swiftSettings: approachableConcurrency
+      swiftSettings: upcomingFeatures
     ),
     .testTarget(
       name: "StreamingLZMATests",
@@ -83,12 +87,13 @@ let package = Package(
       resources: [
         .copy("Fixtures")
       ],
-      swiftSettings: approachableConcurrency
+      swiftSettings: upcomingFeatures
     ),
     .testTarget(
       name: "StreamingLZMAXZTests",
       dependencies: ["StreamingLZMAXZ"],
-      swiftSettings: approachableConcurrency
+      swiftSettings: upcomingFeatures
     )
-  ]
+  ],
+  swiftLanguageModes: [.v5, .v6]
 )

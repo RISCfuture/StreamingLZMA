@@ -1,5 +1,5 @@
 import Clzma
-import Foundation
+public import Foundation
 
 extension Data {
   /// Compresses the data using XZ compression.

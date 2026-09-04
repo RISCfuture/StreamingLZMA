@@ -1,5 +1,5 @@
 import Compression
-import Foundation
+public import Foundation
 
 extension FileHandle {
   // MARK: - Type Methods

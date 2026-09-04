@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// A streaming LZMA compressor that processes data incrementally.
 ///
