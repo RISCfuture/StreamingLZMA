@@ -32,11 +32,17 @@ jobs:
           - os: macos-15
             swift: "6.2"
             test: true
+          - os: macos-15
+            swift: "6.4"
+            test: true
           - os: macos-26
             swift: "6.2"
             test: true
           - os: macos-26
             swift: "6.3"
+            test: true
+          - os: macos-26
+            swift: "6.4"
             test: true
     runs-on: ${{ matrix.os }}
     steps:
