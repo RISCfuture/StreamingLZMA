@@ -9,8 +9,8 @@ import Security
 /// - Returns: Data containing cryptographically random bytes.
 func randomData(count: Int) -> Data {
   var data = Data(count: count)
-  _ = data.withUnsafeMutableBytes { buffer in
-    SecRandomCopyBytes(kSecRandomDefault, count, buffer.baseAddress!)
+  _ = unsafe data.withUnsafeMutableBytes { buffer in
+    unsafe SecRandomCopyBytes(kSecRandomDefault, count, buffer.baseAddress!)
   }
   return data
 }

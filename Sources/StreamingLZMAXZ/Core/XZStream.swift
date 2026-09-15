@@ -6,6 +6,7 @@ import Foundation
 /// This class manages the lifecycle of an XZ compression stream, including initialization,
 /// processing, and cleanup. It is not thread-safe and relies on external synchronization
 /// (provided by actor isolation in the public API).
+@safe
 final class XZStream {
   // MARK: - Instance Properties
 
@@ -38,22 +39,22 @@ final class XZStream {
     self.check = lzma_check(check.rawValue)
 
     // Allocate destination buffer
-    self.destinationBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
+    unsafe self.destinationBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
 
     // Initialize the stream with zeroed memory
-    self.stream = lzma_stream()
+    unsafe self.stream = lzma_stream()
 
     let ret: lzma_ret
     switch direction {
       case .compress:
-        ret = lzma_easy_encoder(&stream, preset, self.check)
+        ret = unsafe lzma_easy_encoder(&stream, preset, self.check)
       case .decompress:
         // Use auto decoder which handles both XZ and raw LZMA streams
-        ret = lzma_auto_decoder(&stream, UInt64.max, 0)
+        ret = unsafe lzma_auto_decoder(&stream, UInt64.max, 0)
     }
 
     guard ret == LZMA_OK else {
-      destinationBuffer.deallocate()
+      unsafe destinationBuffer.deallocate()
       throw Self.mapError(ret)
     }
   }
@@ -95,34 +96,35 @@ final class XZStream {
 
     var processingError: XZError?
 
-    data.withUnsafeBytes { (sourceBuffer: UnsafeRawBufferPointer) in
-      guard let sourcePointer = sourceBuffer.baseAddress?.assumingMemoryBound(to: UInt8.self) else {
+    unsafe data.withUnsafeBytes { (sourceBuffer: UnsafeRawBufferPointer) in
+      guard let sourcePointer = unsafe sourceBuffer.baseAddress?.assumingMemoryBound(to: UInt8.self)
+      else {
         processingError = .processingFailed
         return
       }
 
-      stream.next_in = sourcePointer
-      stream.avail_in = data.count
+      unsafe stream.next_in = sourcePointer
+      unsafe stream.avail_in = data.count
 
-      while stream.avail_in > 0 {
+      while unsafe stream.avail_in > 0 {
         // Reset destination buffer
-        stream.next_out = destinationBuffer
-        stream.avail_out = bufferSize
+        unsafe stream.next_out = destinationBuffer
+        unsafe stream.avail_out = bufferSize
 
-        let ret = lzma_code(&stream, LZMA_RUN)
+        let ret = unsafe lzma_code(&stream, LZMA_RUN)
 
         switch ret {
           case LZMA_OK:
             // Append any output produced
-            let outputSize = bufferSize - stream.avail_out
+            let outputSize = unsafe bufferSize - stream.avail_out
             if outputSize > 0 {
-              output.append(destinationBuffer, count: outputSize)
+              unsafe output.append(destinationBuffer, count: outputSize)
             }
           case LZMA_STREAM_END:
             // Stream ended (shouldn't happen during normal processing without FINISH)
-            let outputSize = bufferSize - stream.avail_out
+            let outputSize = unsafe bufferSize - stream.avail_out
             if outputSize > 0 {
-              output.append(destinationBuffer, count: outputSize)
+              unsafe output.append(destinationBuffer, count: outputSize)
             }
             return
           case LZMA_MEM_ERROR:
@@ -155,20 +157,20 @@ final class XZStream {
     var output = Data()
 
     // Set input to empty
-    stream.next_in = nil
-    stream.avail_in = 0
+    unsafe stream.next_in = nil
+    unsafe stream.avail_in = 0
 
     while true {
       // Reset destination buffer
-      stream.next_out = destinationBuffer
-      stream.avail_out = bufferSize
+      unsafe stream.next_out = destinationBuffer
+      unsafe stream.avail_out = bufferSize
 
-      let ret = lzma_code(&stream, LZMA_FINISH)
+      let ret = unsafe lzma_code(&stream, LZMA_FINISH)
 
       // Append any output produced
-      let outputSize = bufferSize - stream.avail_out
+      let outputSize = unsafe bufferSize - stream.avail_out
       if outputSize > 0 {
-        output.append(destinationBuffer, count: outputSize)
+        unsafe output.append(destinationBuffer, count: outputSize)
       }
 
       switch ret {
@@ -192,17 +194,17 @@ final class XZStream {
   /// - Throws: ``XZError/streamInitializationFailed`` if reinitialization fails.
   func reset() throws(XZError) {
     // End the old stream
-    lzma_end(&stream)
+    unsafe lzma_end(&stream)
 
     // Reinitialize
-    self.stream = lzma_stream()
+    unsafe self.stream = lzma_stream()
 
     let ret: lzma_ret
     switch direction {
       case .compress:
-        ret = lzma_easy_encoder(&stream, preset, check)
+        ret = unsafe lzma_easy_encoder(&stream, preset, check)
       case .decompress:
-        ret = lzma_auto_decoder(&stream, UInt64.max, 0)
+        ret = unsafe lzma_auto_decoder(&stream, UInt64.max, 0)
     }
 
     guard ret == LZMA_OK else {
@@ -215,8 +217,8 @@ final class XZStream {
   // MARK: - Deinitializer
 
   deinit {
-    lzma_end(&stream)
-    destinationBuffer.deallocate()
+    unsafe lzma_end(&stream)
+    unsafe destinationBuffer.deallocate()
   }
 
   // MARK: - Nested Types

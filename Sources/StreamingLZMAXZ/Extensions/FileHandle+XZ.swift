@@ -13,7 +13,7 @@ public import Foundation
 @inline(__always)
 private func posixWrite(_ fd: Int32, _ buffer: UnsafeRawPointer, _ count: Int) -> Int {
   #if canImport(Darwin)
-    Darwin.write(fd, buffer, count)
+    unsafe Darwin.write(fd, buffer, count)
   #elseif canImport(Glibc)
     Glibc.write(fd, buffer, count)
   #elseif canImport(Musl)
@@ -25,7 +25,7 @@ private func posixWrite(_ fd: Int32, _ buffer: UnsafeRawPointer, _ count: Int) -
 @inline(__always)
 private func posixRead(_ fd: Int32, _ buffer: UnsafeMutableRawPointer, _ count: Int) -> Int {
   #if canImport(Darwin)
-    Darwin.read(fd, buffer, count)
+    unsafe Darwin.read(fd, buffer, count)
   #elseif canImport(Glibc)
     Glibc.read(fd, buffer, count)
   #elseif canImport(Musl)
@@ -47,7 +47,7 @@ extension FileHandle {
   ) throws(XZError) {
     var totalWritten = 0
     while totalWritten < count {
-      let n = posixWrite(fd, buffer + totalWritten, count - totalWritten)
+      let n = unsafe posixWrite(fd, buffer + totalWritten, count - totalWritten)
       guard n > 0 else {
         throw XZError.ioFailure(operation: "write", code: errno)
       }
@@ -75,8 +75,8 @@ extension FileHandle {
       dstFD = destination.fileDescriptor
 
     // Initialize compression stream
-    var stream = lzma_stream()
-    var ret = lzma_easy_encoder(
+    var stream = unsafe lzma_stream()
+    var ret = unsafe lzma_easy_encoder(
       &stream,
       configuration.preset,
       lzma_check(configuration.check.rawValue)
@@ -87,20 +87,20 @@ extension FileHandle {
     }
 
     defer {
-      lzma_end(&stream)
+      unsafe lzma_end(&stream)
     }
 
     let destinationBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
-    defer { destinationBuffer.deallocate() }
+    defer { unsafe destinationBuffer.deallocate() }
 
     let sourceBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
-    defer { sourceBuffer.deallocate() }
+    defer { unsafe sourceBuffer.deallocate() }
 
     var totalBytesRead: Int64 = 0
 
     // Process input in chunks
     while true {
-      let bytesRead = posixRead(srcFD, sourceBuffer, bufferSize)
+      let bytesRead = unsafe posixRead(srcFD, sourceBuffer, bufferSize)
       guard bytesRead >= 0 else {
         throw XZError.ioFailure(operation: "read from source", code: errno)
       }
@@ -109,17 +109,17 @@ extension FileHandle {
       totalBytesRead += Int64(bytesRead)
       progress?(totalBytesRead)
 
-      stream.next_in = UnsafePointer(sourceBuffer)
-      stream.avail_in = bytesRead
-      stream.next_out = destinationBuffer
-      stream.avail_out = bufferSize
+      unsafe stream.next_in = UnsafePointer(sourceBuffer)
+      unsafe stream.avail_in = bytesRead
+      unsafe stream.next_out = destinationBuffer
+      unsafe stream.avail_out = bufferSize
 
-      while stream.avail_in > 0 {
-        ret = lzma_code(&stream, LZMA_RUN)
+      while unsafe stream.avail_in > 0 {
+        ret = unsafe lzma_code(&stream, LZMA_RUN)
 
-        let outputSize = bufferSize - stream.avail_out
+        let outputSize = unsafe bufferSize - stream.avail_out
         if outputSize > 0 {
-          try Self._xzWriteAll(dstFD, destinationBuffer, outputSize)
+          unsafe try Self._xzWriteAll(dstFD, destinationBuffer, outputSize)
         }
 
         if ret == LZMA_MEM_ERROR {
@@ -129,22 +129,22 @@ extension FileHandle {
           throw XZError.processingFailed
         }
 
-        stream.next_out = destinationBuffer
-        stream.avail_out = bufferSize
+        unsafe stream.next_out = destinationBuffer
+        unsafe stream.avail_out = bufferSize
       }
     }
 
     // Finalize
-    stream.avail_in = 0
-    stream.next_out = destinationBuffer
-    stream.avail_out = bufferSize
+    unsafe stream.avail_in = 0
+    unsafe stream.next_out = destinationBuffer
+    unsafe stream.avail_out = bufferSize
 
     while true {
-      ret = lzma_code(&stream, LZMA_FINISH)
+      ret = unsafe lzma_code(&stream, LZMA_FINISH)
 
-      let outputSize = bufferSize - stream.avail_out
+      let outputSize = unsafe bufferSize - stream.avail_out
       if outputSize > 0 {
-        try Self._xzWriteAll(dstFD, destinationBuffer, outputSize)
+        unsafe try Self._xzWriteAll(dstFD, destinationBuffer, outputSize)
       }
 
       if ret == LZMA_STREAM_END {
@@ -154,8 +154,8 @@ extension FileHandle {
         throw XZError.processingFailed
       }
 
-      stream.next_out = destinationBuffer
-      stream.avail_out = bufferSize
+      unsafe stream.next_out = destinationBuffer
+      unsafe stream.avail_out = bufferSize
     }
   }
 
@@ -179,28 +179,28 @@ extension FileHandle {
       dstFD = destination.fileDescriptor
 
     // Initialize decompression stream
-    var stream = lzma_stream()
-    var ret = lzma_auto_decoder(&stream, UInt64.max, 0)
+    var stream = unsafe lzma_stream()
+    var ret = unsafe lzma_auto_decoder(&stream, UInt64.max, 0)
 
     guard ret == LZMA_OK else {
       throw .streamInitializationFailed
     }
 
     defer {
-      lzma_end(&stream)
+      unsafe lzma_end(&stream)
     }
 
     let destinationBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
-    defer { destinationBuffer.deallocate() }
+    defer { unsafe destinationBuffer.deallocate() }
 
     let sourceBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
-    defer { sourceBuffer.deallocate() }
+    defer { unsafe sourceBuffer.deallocate() }
 
     var totalBytesRead: Int64 = 0
 
     // Process input in chunks
     while true {
-      let bytesRead = posixRead(srcFD, sourceBuffer, bufferSize)
+      let bytesRead = unsafe posixRead(srcFD, sourceBuffer, bufferSize)
       guard bytesRead >= 0 else {
         throw XZError.ioFailure(operation: "read from source", code: errno)
       }
@@ -209,17 +209,17 @@ extension FileHandle {
       totalBytesRead += Int64(bytesRead)
       progress?(totalBytesRead)
 
-      stream.next_in = UnsafePointer(sourceBuffer)
-      stream.avail_in = bytesRead
-      stream.next_out = destinationBuffer
-      stream.avail_out = bufferSize
+      unsafe stream.next_in = UnsafePointer(sourceBuffer)
+      unsafe stream.avail_in = bytesRead
+      unsafe stream.next_out = destinationBuffer
+      unsafe stream.avail_out = bufferSize
 
-      while stream.avail_in > 0 || ret == LZMA_OK {
-        ret = lzma_code(&stream, LZMA_RUN)
+      while unsafe stream.avail_in > 0 || ret == LZMA_OK {
+        ret = unsafe lzma_code(&stream, LZMA_RUN)
 
-        let outputSize = bufferSize - stream.avail_out
+        let outputSize = unsafe bufferSize - stream.avail_out
         if outputSize > 0 {
-          try Self._xzWriteAll(dstFD, destinationBuffer, outputSize)
+          unsafe try Self._xzWriteAll(dstFD, destinationBuffer, outputSize)
         }
 
         if ret == LZMA_MEM_ERROR {
@@ -233,26 +233,26 @@ extension FileHandle {
           return
         }
 
-        stream.next_out = destinationBuffer
-        stream.avail_out = bufferSize
+        unsafe stream.next_out = destinationBuffer
+        unsafe stream.avail_out = bufferSize
 
-        if stream.avail_in == 0 {
+        if unsafe stream.avail_in == 0 {
           break
         }
       }
     }
 
     // Finalize
-    stream.avail_in = 0
-    stream.next_out = destinationBuffer
-    stream.avail_out = bufferSize
+    unsafe stream.avail_in = 0
+    unsafe stream.next_out = destinationBuffer
+    unsafe stream.avail_out = bufferSize
 
     while true {
-      ret = lzma_code(&stream, LZMA_FINISH)
+      ret = unsafe lzma_code(&stream, LZMA_FINISH)
 
-      let outputSize = bufferSize - stream.avail_out
+      let outputSize = unsafe bufferSize - stream.avail_out
       if outputSize > 0 {
-        try Self._xzWriteAll(dstFD, destinationBuffer, outputSize)
+        unsafe try Self._xzWriteAll(dstFD, destinationBuffer, outputSize)
       }
 
       if ret == LZMA_STREAM_END {
@@ -265,8 +265,8 @@ extension FileHandle {
         throw XZError.processingFailed
       }
 
-      stream.next_out = destinationBuffer
-      stream.avail_out = bufferSize
+      unsafe stream.next_out = destinationBuffer
+      unsafe stream.avail_out = bufferSize
     }
   }
 }

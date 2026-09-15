@@ -22,13 +22,14 @@ extension Data {
     var output = Data()
     var processingError: LZMAError?
 
-    withUnsafeBytes { (sourceBuffer: UnsafeRawBufferPointer) in
-      guard let sourcePointer = sourceBuffer.baseAddress?.assumingMemoryBound(to: UInt8.self) else {
+    unsafe withUnsafeBytes { (sourceBuffer: UnsafeRawBufferPointer) in
+      guard let sourcePointer = unsafe sourceBuffer.baseAddress?.assumingMemoryBound(to: UInt8.self)
+      else {
         processingError = .processingFailed
         return
       }
 
-      var stream = compression_stream(
+      var stream = unsafe compression_stream(
         dst_ptr: UnsafeMutablePointer(bitPattern: 1)!,
         dst_size: 0,
         src_ptr: sourcePointer,
@@ -36,7 +37,11 @@ extension Data {
         state: nil
       )
 
-      var status = compression_stream_init(&stream, COMPRESSION_STREAM_ENCODE, COMPRESSION_LZMA)
+      var status = unsafe compression_stream_init(
+        &stream,
+        COMPRESSION_STREAM_ENCODE,
+        COMPRESSION_LZMA
+      )
 
       guard status == COMPRESSION_STATUS_OK else {
         processingError = .streamInitializationFailed
@@ -44,31 +49,31 @@ extension Data {
       }
 
       defer {
-        compression_stream_destroy(&stream)
+        unsafe compression_stream_destroy(&stream)
       }
 
       let destinationBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
       defer {
-        destinationBuffer.deallocate()
+        unsafe destinationBuffer.deallocate()
       }
 
-      stream.src_ptr = sourcePointer
-      stream.src_size = count
-      stream.dst_ptr = destinationBuffer
-      stream.dst_size = bufferSize
+      unsafe stream.src_ptr = sourcePointer
+      unsafe stream.src_size = count
+      unsafe stream.dst_ptr = destinationBuffer
+      unsafe stream.dst_size = bufferSize
 
       // Process all input
-      while stream.src_size > 0 {
-        status = compression_stream_process(&stream, 0)
+      while unsafe stream.src_size > 0 {
+        status = unsafe compression_stream_process(&stream, 0)
 
         switch status {
           case COMPRESSION_STATUS_OK, COMPRESSION_STATUS_END:
-            let outputSize = bufferSize - stream.dst_size
+            let outputSize = unsafe bufferSize - stream.dst_size
             if outputSize > 0 {
-              output.append(destinationBuffer, count: outputSize)
+              unsafe output.append(destinationBuffer, count: outputSize)
             }
-            stream.dst_ptr = destinationBuffer
-            stream.dst_size = bufferSize
+            unsafe stream.dst_ptr = destinationBuffer
+            unsafe stream.dst_size = bufferSize
           case COMPRESSION_STATUS_ERROR:
             processingError = .processingFailed
             return
@@ -80,11 +85,14 @@ extension Data {
 
       // Finalize
       while true {
-        status = compression_stream_process(&stream, Int32(COMPRESSION_STREAM_FINALIZE.rawValue))
+        status = unsafe compression_stream_process(
+          &stream,
+          Int32(COMPRESSION_STREAM_FINALIZE.rawValue)
+        )
 
-        let outputSize = bufferSize - stream.dst_size
+        let outputSize = unsafe bufferSize - stream.dst_size
         if outputSize > 0 {
-          output.append(destinationBuffer, count: outputSize)
+          unsafe output.append(destinationBuffer, count: outputSize)
         }
 
         if status == COMPRESSION_STATUS_END {
@@ -95,8 +103,8 @@ extension Data {
           return
         }
 
-        stream.dst_ptr = destinationBuffer
-        stream.dst_size = bufferSize
+        unsafe stream.dst_ptr = destinationBuffer
+        unsafe stream.dst_size = bufferSize
       }
     }
 
@@ -126,13 +134,14 @@ extension Data {
     var output = Data()
     var processingError: LZMAError?
 
-    withUnsafeBytes { (sourceBuffer: UnsafeRawBufferPointer) in
-      guard let sourcePointer = sourceBuffer.baseAddress?.assumingMemoryBound(to: UInt8.self) else {
+    unsafe withUnsafeBytes { (sourceBuffer: UnsafeRawBufferPointer) in
+      guard let sourcePointer = unsafe sourceBuffer.baseAddress?.assumingMemoryBound(to: UInt8.self)
+      else {
         processingError = .processingFailed
         return
       }
 
-      var stream = compression_stream(
+      var stream = unsafe compression_stream(
         dst_ptr: UnsafeMutablePointer(bitPattern: 1)!,
         dst_size: 0,
         src_ptr: sourcePointer,
@@ -140,7 +149,11 @@ extension Data {
         state: nil
       )
 
-      var status = compression_stream_init(&stream, COMPRESSION_STREAM_DECODE, COMPRESSION_LZMA)
+      var status = unsafe compression_stream_init(
+        &stream,
+        COMPRESSION_STREAM_DECODE,
+        COMPRESSION_LZMA
+      )
 
       guard status == COMPRESSION_STATUS_OK else {
         processingError = .streamInitializationFailed
@@ -148,32 +161,35 @@ extension Data {
       }
 
       defer {
-        compression_stream_destroy(&stream)
+        unsafe compression_stream_destroy(&stream)
       }
 
       let destinationBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
       defer {
-        destinationBuffer.deallocate()
+        unsafe destinationBuffer.deallocate()
       }
 
-      stream.src_ptr = sourcePointer
-      stream.src_size = count
-      stream.dst_ptr = destinationBuffer
-      stream.dst_size = bufferSize
+      unsafe stream.src_ptr = sourcePointer
+      unsafe stream.src_size = count
+      unsafe stream.dst_ptr = destinationBuffer
+      unsafe stream.dst_size = bufferSize
 
       // Process all input
       while true {
-        status = compression_stream_process(&stream, Int32(COMPRESSION_STREAM_FINALIZE.rawValue))
+        status = unsafe compression_stream_process(
+          &stream,
+          Int32(COMPRESSION_STREAM_FINALIZE.rawValue)
+        )
 
-        let outputSize = bufferSize - stream.dst_size
+        let outputSize = unsafe bufferSize - stream.dst_size
         if outputSize > 0 {
-          output.append(destinationBuffer, count: outputSize)
+          unsafe output.append(destinationBuffer, count: outputSize)
         }
 
         switch status {
           case COMPRESSION_STATUS_OK:
-            stream.dst_ptr = destinationBuffer
-            stream.dst_size = bufferSize
+            unsafe stream.dst_ptr = destinationBuffer
+            unsafe stream.dst_size = bufferSize
           case COMPRESSION_STATUS_END:
             return
           case COMPRESSION_STATUS_ERROR:

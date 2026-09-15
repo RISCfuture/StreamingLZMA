@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Building the package now needs Swift 6.2 or newer. The manifest moves to tools version 6.2,
+  which strict memory safety and its `unsafe` expression marker require.
+
+### Security
+
+- Strict memory safety (SE-0458) is enabled. The Apple Compression and liblzma call sites carry
+  audited `unsafe` markers, and `LZMAStream` and `XZStream` are marked `@safe`, since each
+  encapsulates its stream storage behind a `Data`-in, `Data`-out interface.
+
 ## [2.0.1] - 2026-09-14
 
 ### Changed

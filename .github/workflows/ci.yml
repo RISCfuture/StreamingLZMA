@@ -1,11 +1,16 @@
 # CI Matrix Policy
 #
-# The package builds on Swift 6.0, the tools-version floor, so consumers on older
-# toolchains stay supported. The test suite names its cases with raw identifiers
-# (SE-0451), which need a 6.2 or newer compiler, so legs below 6.2 build only.
+# Every leg runs Swift 6.2 or newer. That is the tools-version floor, and it is also
+# what the sources need a compiler to parse: the test suite names its cases with raw
+# identifiers (SE-0451) and the C-interop code carries 'unsafe' markers (SE-0458).
 #
 # When bumping the tools-version: drop every leg below it and keep the newest
 # toolchain running the tests.
+#
+# Swift 6.4 runs on macos-26 only. This package ships a String Catalog, so SwiftPM
+# generates string symbols by invoking `xcstringstool generate-symbols --language`,
+# and that flag needs a newer xcstringstool than Xcode 16.4 supplies. Xcode 16.4 is
+# the newest the macos-15 runner image carries, so macos-15 stays on Swift 6.2.
 
 name: CI
 
@@ -27,13 +32,7 @@ jobs:
       matrix:
         include:
           - os: macos-15
-            swift: "6.0"
-            test: false
-          - os: macos-15
             swift: "6.2"
-            test: true
-          - os: macos-15
-            swift: "6.4"
             test: true
           - os: macos-26
             swift: "6.2"
