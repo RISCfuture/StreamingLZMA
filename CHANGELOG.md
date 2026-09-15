@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2026-09-14
+
+### Changed
+
+- Raised the minimum versions of the package's dependencies: swift-argument-parser 1.8.2
+  and swift-docc-plugin 1.5.0. A consumer holding either dependency below those versions
+  will need to move up to resolve this package.
+- The package manifest now declares `swiftLanguageModes: [.v5, .v6]` and builds every
+  target with the Swift-7-track upcoming features enabled (`ImmutableWeakCaptures`,
+  `MemberImportVisibility`, `ExistentialAny`, `InternalImportsByDefault`) alongside the
+  approachable-concurrency flags already in use. The tools version stays at 6.0 and the
+  public API is unchanged, so existing consumers need no changes. Building the test suite
+  from source now requires Swift 6.2 or later, whose raw identifiers the test names use.
+
 ## [2.0.0] - 2026-08-18
 
 ### Removed
