@@ -19,13 +19,13 @@ extension InputStream {
       let compressor = try LZMACompressor(configuration: configuration)
       let bufferSize = configuration.bufferSize.bytes
       let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
-      defer { buffer.deallocate() }
+      defer { unsafe buffer.deallocate() }
 
       stream.open()
       defer { stream.close() }
 
       while stream.hasBytesAvailable {
-        let bytesRead = stream.read(buffer, maxLength: bufferSize)
+        let bytesRead = unsafe stream.read(buffer, maxLength: bufferSize)
 
         if bytesRead < 0 {
           if let streamError = stream.streamError {
@@ -40,7 +40,7 @@ extension InputStream {
           break
         }
 
-        let chunk = Data(bytes: buffer, count: bytesRead)
+        let chunk = unsafe Data(bytes: buffer, count: bytesRead)
         let compressed = try await compressor.compress(chunk)
         if !compressed.isEmpty {
           continuation.yield(compressed)
@@ -74,13 +74,13 @@ extension InputStream {
       let decompressor = try LZMADecompressor(configuration: configuration)
       let bufferSize = configuration.bufferSize.bytes
       let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
-      defer { buffer.deallocate() }
+      defer { unsafe buffer.deallocate() }
 
       stream.open()
       defer { stream.close() }
 
       while stream.hasBytesAvailable {
-        let bytesRead = stream.read(buffer, maxLength: bufferSize)
+        let bytesRead = unsafe stream.read(buffer, maxLength: bufferSize)
 
         if bytesRead < 0 {
           if let streamError = stream.streamError {
@@ -95,7 +95,7 @@ extension InputStream {
           break
         }
 
-        let chunk = Data(bytes: buffer, count: bytesRead)
+        let chunk = unsafe Data(bytes: buffer, count: bytesRead)
         let decompressed = try await decompressor.decompress(chunk)
         if !decompressed.isEmpty {
           continuation.yield(decompressed)

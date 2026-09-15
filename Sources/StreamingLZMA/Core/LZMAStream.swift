@@ -6,6 +6,7 @@ import Foundation
 /// This class manages the lifecycle of a compression stream, including initialization,
 /// processing, and cleanup. It is not thread-safe and relies on external synchronization
 /// (provided by actor isolation in the public API).
+@safe
 final class LZMAStream {
   // MARK: - Instance Properties
 
@@ -27,10 +28,10 @@ final class LZMAStream {
     self.bufferSize = bufferSize
 
     // Allocate destination buffer
-    self.destinationBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
+    unsafe self.destinationBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
 
     // Initialize the stream with zeroed memory
-    self.stream = compression_stream(
+    unsafe self.stream = compression_stream(
       dst_ptr: destinationBuffer,
       dst_size: bufferSize,
       src_ptr: UnsafePointer(bitPattern: 1)!,  // Non-null placeholder, will be set during process
@@ -38,20 +39,20 @@ final class LZMAStream {
       state: nil
     )
 
-    let status = compression_stream_init(
+    let status = unsafe compression_stream_init(
       &stream,
       direction.operation,
       COMPRESSION_LZMA
     )
 
     guard status == COMPRESSION_STATUS_OK else {
-      destinationBuffer.deallocate()
+      unsafe destinationBuffer.deallocate()
       throw .streamInitializationFailed
     }
 
     // Set up the destination buffer after init
-    stream.dst_ptr = destinationBuffer
-    stream.dst_size = bufferSize
+    unsafe stream.dst_ptr = destinationBuffer
+    unsafe stream.dst_size = bufferSize
   }
 
   // MARK: - Instance Methods
@@ -73,34 +74,35 @@ final class LZMAStream {
 
     var processingError: LZMAError?
 
-    data.withUnsafeBytes { (sourceBuffer: UnsafeRawBufferPointer) in
-      guard let sourcePointer = sourceBuffer.baseAddress?.assumingMemoryBound(to: UInt8.self) else {
+    unsafe data.withUnsafeBytes { (sourceBuffer: UnsafeRawBufferPointer) in
+      guard let sourcePointer = unsafe sourceBuffer.baseAddress?.assumingMemoryBound(to: UInt8.self)
+      else {
         processingError = .processingFailed
         return
       }
 
-      stream.src_ptr = sourcePointer
-      stream.src_size = data.count
+      unsafe stream.src_ptr = sourcePointer
+      unsafe stream.src_size = data.count
 
-      while stream.src_size > 0 {
+      while unsafe stream.src_size > 0 {
         // Reset destination buffer
-        stream.dst_ptr = destinationBuffer
-        stream.dst_size = bufferSize
+        unsafe stream.dst_ptr = destinationBuffer
+        unsafe stream.dst_size = bufferSize
 
-        let status = compression_stream_process(&stream, 0)
+        let status = unsafe compression_stream_process(&stream, 0)
 
         switch status {
           case COMPRESSION_STATUS_OK:
             // Append any output produced
-            let outputSize = bufferSize - stream.dst_size
+            let outputSize = unsafe bufferSize - stream.dst_size
             if outputSize > 0 {
-              output.append(destinationBuffer, count: outputSize)
+              unsafe output.append(destinationBuffer, count: outputSize)
             }
           case COMPRESSION_STATUS_END:
             // Stream ended (shouldn't happen during normal processing)
-            let outputSize = bufferSize - stream.dst_size
+            let outputSize = unsafe bufferSize - stream.dst_size
             if outputSize > 0 {
-              output.append(destinationBuffer, count: outputSize)
+              unsafe output.append(destinationBuffer, count: outputSize)
             }
             return
           case COMPRESSION_STATUS_ERROR:
@@ -134,21 +136,24 @@ final class LZMAStream {
     // Set source to empty - use a valid pointer with zero size
     let emptyByte: UInt8 = 0
     withUnsafePointer(to: emptyByte) { ptr in
-      stream.src_ptr = ptr
+      unsafe stream.src_ptr = ptr
     }
-    stream.src_size = 0
+    unsafe stream.src_size = 0
 
     while true {
       // Reset destination buffer
-      stream.dst_ptr = destinationBuffer
-      stream.dst_size = bufferSize
+      unsafe stream.dst_ptr = destinationBuffer
+      unsafe stream.dst_size = bufferSize
 
-      let status = compression_stream_process(&stream, Int32(COMPRESSION_STREAM_FINALIZE.rawValue))
+      let status = unsafe compression_stream_process(
+        &stream,
+        Int32(COMPRESSION_STREAM_FINALIZE.rawValue)
+      )
 
       // Append any output produced
-      let outputSize = bufferSize - stream.dst_size
+      let outputSize = unsafe bufferSize - stream.dst_size
       if outputSize > 0 {
-        output.append(destinationBuffer, count: outputSize)
+        unsafe output.append(destinationBuffer, count: outputSize)
       }
 
       switch status {
@@ -170,10 +175,10 @@ final class LZMAStream {
   /// - Throws: ``LZMAError/streamInitializationFailed`` if reinitialization fails.
   func reset() throws(LZMAError) {
     // Destroy the old stream
-    compression_stream_destroy(&stream)
+    unsafe compression_stream_destroy(&stream)
 
     // Reinitialize
-    self.stream = compression_stream(
+    unsafe self.stream = compression_stream(
       dst_ptr: destinationBuffer,
       dst_size: bufferSize,
       src_ptr: UnsafePointer(bitPattern: 1)!,
@@ -181,7 +186,7 @@ final class LZMAStream {
       state: nil
     )
 
-    let status = compression_stream_init(
+    let status = unsafe compression_stream_init(
       &stream,
       direction.operation,
       COMPRESSION_LZMA
@@ -192,16 +197,16 @@ final class LZMAStream {
     }
 
     // Reset state
-    stream.dst_ptr = destinationBuffer
-    stream.dst_size = bufferSize
+    unsafe stream.dst_ptr = destinationBuffer
+    unsafe stream.dst_size = bufferSize
     isFinalized = false
   }
 
   // MARK: - Deinitializer
 
   deinit {
-    compression_stream_destroy(&stream)
-    destinationBuffer.deallocate()
+    unsafe compression_stream_destroy(&stream)
+    unsafe destinationBuffer.deallocate()
   }
 
   // MARK: - Nested Types

@@ -72,13 +72,13 @@ public struct LZMAFileHeader: Sendable, Hashable {
     self.properties = data[data.startIndex]
 
     // Dictionary size (little-endian)
-    self.dictionarySize = data.withUnsafeBytes { buffer in
-      buffer.loadUnaligned(fromByteOffset: 1, as: UInt32.self).littleEndian
+    self.dictionarySize = unsafe data.withUnsafeBytes { buffer in
+      unsafe buffer.loadUnaligned(fromByteOffset: 1, as: UInt32.self).littleEndian
     }
 
     // Uncompressed size (little-endian)
-    self.uncompressedSize = data.withUnsafeBytes { buffer in
-      buffer.loadUnaligned(fromByteOffset: 5, as: UInt64.self).littleEndian
+    self.uncompressedSize = unsafe data.withUnsafeBytes { buffer in
+      unsafe buffer.loadUnaligned(fromByteOffset: 5, as: UInt64.self).littleEndian
     }
   }
 
@@ -94,11 +94,11 @@ public struct LZMAFileHeader: Sendable, Hashable {
 
     // Dictionary size (little-endian)
     var dictSize = dictionarySize.littleEndian
-    withUnsafeBytes(of: &dictSize) { data.append(contentsOf: $0) }
+    withUnsafeBytes(of: &dictSize) { unsafe data.append(contentsOf: $0) }
 
     // Uncompressed size (little-endian)
     var uncSize = uncompressedSize.littleEndian
-    withUnsafeBytes(of: &uncSize) { data.append(contentsOf: $0) }
+    withUnsafeBytes(of: &uncSize) { unsafe data.append(contentsOf: $0) }
 
     return data
   }
