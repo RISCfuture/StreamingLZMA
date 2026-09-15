@@ -52,7 +52,7 @@ extension XZError: CustomStringConvertible {
       case .internalError(let message):
         return "Internal error: \(message)"
       case let .ioFailure(operation, code):
-        return "Failed to \(operation): \(String(cString: strerror(code)))"
+        return unsafe "Failed to \(operation): \(String(cString: strerror(code)))"
     }
   }
 }
@@ -114,7 +114,7 @@ extension XZError: CustomStringConvertible {
           return String(localized: "An internal error occurred: \(message)", bundle: .module)
         case let .ioFailure(operation, code):
           return String(
-            localized: "Failed to \(operation): \(String(cString: strerror(code))).",
+            localized: unsafe "Failed to \(operation): \(String(cString: strerror(code))).",
             bundle: .module
           )
       }

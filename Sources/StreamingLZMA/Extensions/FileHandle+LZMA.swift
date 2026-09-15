@@ -15,7 +15,7 @@ extension FileHandle {
   ) throws(LZMAError) {
     var totalWritten = 0
     while totalWritten < count {
-      let n = Darwin.write(fd, buffer + totalWritten, count - totalWritten)
+      let n = unsafe Darwin.write(fd, buffer + totalWritten, count - totalWritten)
       guard n > 0 else {
         throw LZMAError.ioFailure(operation: "write", code: errno)
       }
@@ -45,7 +45,7 @@ extension FileHandle {
       dstFD = destination.fileDescriptor
 
     // Initialize compression stream
-    var stream = compression_stream(
+    var stream = unsafe compression_stream(
       dst_ptr: UnsafeMutablePointer(bitPattern: 1)!,
       dst_size: 0,
       src_ptr: UnsafePointer(bitPattern: 1)!,
@@ -53,26 +53,30 @@ extension FileHandle {
       state: nil
     )
 
-    var status = compression_stream_init(&stream, COMPRESSION_STREAM_ENCODE, COMPRESSION_LZMA)
+    var status = unsafe compression_stream_init(
+      &stream,
+      COMPRESSION_STREAM_ENCODE,
+      COMPRESSION_LZMA
+    )
     guard status == COMPRESSION_STATUS_OK else {
       throw .streamInitializationFailed
     }
 
     defer {
-      compression_stream_destroy(&stream)
+      unsafe compression_stream_destroy(&stream)
     }
 
     let destinationBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
-    defer { destinationBuffer.deallocate() }
+    defer { unsafe destinationBuffer.deallocate() }
 
     let sourceBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
-    defer { sourceBuffer.deallocate() }
+    defer { unsafe sourceBuffer.deallocate() }
 
     var totalBytesRead: Int64 = 0
 
     // Process input in chunks
     while true {
-      let bytesRead = Darwin.read(srcFD, sourceBuffer, bufferSize)
+      let bytesRead = unsafe Darwin.read(srcFD, sourceBuffer, bufferSize)
       guard bytesRead >= 0 else {
         throw LZMAError.ioFailure(operation: "read from source", code: errno)
       }
@@ -81,39 +85,42 @@ extension FileHandle {
       totalBytesRead += Int64(bytesRead)
       progress?(totalBytesRead)
 
-      stream.src_ptr = UnsafePointer(sourceBuffer)
-      stream.src_size = bytesRead
-      stream.dst_ptr = destinationBuffer
-      stream.dst_size = bufferSize
+      unsafe stream.src_ptr = UnsafePointer(sourceBuffer)
+      unsafe stream.src_size = bytesRead
+      unsafe stream.dst_ptr = destinationBuffer
+      unsafe stream.dst_size = bufferSize
 
-      while stream.src_size > 0 {
-        status = compression_stream_process(&stream, 0)
+      while unsafe stream.src_size > 0 {
+        status = unsafe compression_stream_process(&stream, 0)
 
-        let outputSize = bufferSize - stream.dst_size
+        let outputSize = unsafe bufferSize - stream.dst_size
         if outputSize > 0 {
-          try Self._writeAll(dstFD, destinationBuffer, outputSize)
+          unsafe try Self._writeAll(dstFD, destinationBuffer, outputSize)
         }
 
         if status == COMPRESSION_STATUS_ERROR {
           throw LZMAError.processingFailed
         }
 
-        stream.dst_ptr = destinationBuffer
-        stream.dst_size = bufferSize
+        unsafe stream.dst_ptr = destinationBuffer
+        unsafe stream.dst_size = bufferSize
       }
     }
 
     // Finalize
-    stream.src_size = 0
-    stream.dst_ptr = destinationBuffer
-    stream.dst_size = bufferSize
+    unsafe stream.src_size = 0
+    unsafe stream.dst_ptr = destinationBuffer
+    unsafe stream.dst_size = bufferSize
 
     while true {
-      status = compression_stream_process(&stream, Int32(COMPRESSION_STREAM_FINALIZE.rawValue))
+      status = unsafe compression_stream_process(
+        &stream,
+        Int32(COMPRESSION_STREAM_FINALIZE.rawValue)
+      )
 
-      let outputSize = bufferSize - stream.dst_size
+      let outputSize = unsafe bufferSize - stream.dst_size
       if outputSize > 0 {
-        try Self._writeAll(dstFD, destinationBuffer, outputSize)
+        unsafe try Self._writeAll(dstFD, destinationBuffer, outputSize)
       }
 
       if status == COMPRESSION_STATUS_END {
@@ -123,8 +130,8 @@ extension FileHandle {
         throw LZMAError.processingFailed
       }
 
-      stream.dst_ptr = destinationBuffer
-      stream.dst_size = bufferSize
+      unsafe stream.dst_ptr = destinationBuffer
+      unsafe stream.dst_size = bufferSize
     }
   }
 
@@ -148,7 +155,7 @@ extension FileHandle {
       dstFD = destination.fileDescriptor
 
     // Initialize decompression stream
-    var stream = compression_stream(
+    var stream = unsafe compression_stream(
       dst_ptr: UnsafeMutablePointer(bitPattern: 1)!,
       dst_size: 0,
       src_ptr: UnsafePointer(bitPattern: 1)!,
@@ -156,26 +163,30 @@ extension FileHandle {
       state: nil
     )
 
-    var status = compression_stream_init(&stream, COMPRESSION_STREAM_DECODE, COMPRESSION_LZMA)
+    var status = unsafe compression_stream_init(
+      &stream,
+      COMPRESSION_STREAM_DECODE,
+      COMPRESSION_LZMA
+    )
     guard status == COMPRESSION_STATUS_OK else {
       throw .streamInitializationFailed
     }
 
     defer {
-      compression_stream_destroy(&stream)
+      unsafe compression_stream_destroy(&stream)
     }
 
     let destinationBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
-    defer { destinationBuffer.deallocate() }
+    defer { unsafe destinationBuffer.deallocate() }
 
     let sourceBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
-    defer { sourceBuffer.deallocate() }
+    defer { unsafe sourceBuffer.deallocate() }
 
     var totalBytesRead: Int64 = 0
 
     // Process input in chunks
     while true {
-      let bytesRead = Darwin.read(srcFD, sourceBuffer, bufferSize)
+      let bytesRead = unsafe Darwin.read(srcFD, sourceBuffer, bufferSize)
       guard bytesRead >= 0 else {
         throw LZMAError.ioFailure(operation: "read from source", code: errno)
       }
@@ -184,17 +195,17 @@ extension FileHandle {
       totalBytesRead += Int64(bytesRead)
       progress?(totalBytesRead)
 
-      stream.src_ptr = UnsafePointer(sourceBuffer)
-      stream.src_size = bytesRead
-      stream.dst_ptr = destinationBuffer
-      stream.dst_size = bufferSize
+      unsafe stream.src_ptr = UnsafePointer(sourceBuffer)
+      unsafe stream.src_size = bytesRead
+      unsafe stream.dst_ptr = destinationBuffer
+      unsafe stream.dst_size = bufferSize
 
-      while stream.src_size > 0 || status == COMPRESSION_STATUS_OK {
-        status = compression_stream_process(&stream, 0)
+      while unsafe stream.src_size > 0 || status == COMPRESSION_STATUS_OK {
+        status = unsafe compression_stream_process(&stream, 0)
 
-        let outputSize = bufferSize - stream.dst_size
+        let outputSize = unsafe bufferSize - stream.dst_size
         if outputSize > 0 {
-          try Self._writeAll(dstFD, destinationBuffer, outputSize)
+          unsafe try Self._writeAll(dstFD, destinationBuffer, outputSize)
         }
 
         if status == COMPRESSION_STATUS_ERROR {
@@ -205,26 +216,29 @@ extension FileHandle {
           return
         }
 
-        stream.dst_ptr = destinationBuffer
-        stream.dst_size = bufferSize
+        unsafe stream.dst_ptr = destinationBuffer
+        unsafe stream.dst_size = bufferSize
 
-        if stream.src_size == 0 {
+        if unsafe stream.src_size == 0 {
           break
         }
       }
     }
 
     // Finalize
-    stream.src_size = 0
-    stream.dst_ptr = destinationBuffer
-    stream.dst_size = bufferSize
+    unsafe stream.src_size = 0
+    unsafe stream.dst_ptr = destinationBuffer
+    unsafe stream.dst_size = bufferSize
 
     while true {
-      status = compression_stream_process(&stream, Int32(COMPRESSION_STREAM_FINALIZE.rawValue))
+      status = unsafe compression_stream_process(
+        &stream,
+        Int32(COMPRESSION_STREAM_FINALIZE.rawValue)
+      )
 
-      let outputSize = bufferSize - stream.dst_size
+      let outputSize = unsafe bufferSize - stream.dst_size
       if outputSize > 0 {
-        try Self._writeAll(dstFD, destinationBuffer, outputSize)
+        unsafe try Self._writeAll(dstFD, destinationBuffer, outputSize)
       }
 
       if status == COMPRESSION_STATUS_END {
@@ -234,8 +248,8 @@ extension FileHandle {
         throw LZMAError.corruptedData
       }
 
-      stream.dst_ptr = destinationBuffer
-      stream.dst_size = bufferSize
+      unsafe stream.dst_ptr = destinationBuffer
+      unsafe stream.dst_size = bufferSize
     }
   }
 
