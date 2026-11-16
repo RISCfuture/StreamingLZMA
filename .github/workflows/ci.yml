@@ -25,8 +25,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  route:
+    uses: RISCfuture/ci-workflows/.github/workflows/minerva-route.yml@1.1.0
+    permissions:
+      contents: read
   tests:
     name: Build and Test
+    needs: route
     strategy:
       fail-fast: false
       matrix:
@@ -43,7 +48,7 @@ jobs:
           - os: macos-26
             swift: "6.4"
             test: true
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ (matrix.os == 'macos-26' || matrix.os == 'macos-latest') && matrix.swift == '6.4' && fromJSON(needs.route.outputs[matrix.os]) || matrix.os }}
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: SwiftyLab/setup-swift@v1.14.2
@@ -66,7 +71,8 @@ jobs:
         run: swift test -v
   test-ios:
     name: Build for iOS
-    runs-on: xcode-27
+    needs: route
+    runs-on: ${{ fromJSON(needs.route.outputs.xcode-27) }}
     steps:
       - uses: actions/checkout@v7.0.1
       - name: Record toolchain version
@@ -90,7 +96,8 @@ jobs:
             -derivedDataPath DerivedData
   documentation:
     name: Build Documentation
-    runs-on: macos-latest
+    needs: route
+    runs-on: ${{ fromJSON(needs.route.outputs.macos-latest) }}
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: SwiftyLab/setup-swift@v1.14.2
@@ -114,7 +121,8 @@ jobs:
             --output-path "$RUNNER_TEMP/docs"
   lint:
     name: Run SwiftLint
-    runs-on: macos-latest
+    needs: route
+    runs-on: ${{ fromJSON(needs.route.outputs.macos-latest) }}
     steps:
       - uses: actions/checkout@v7.0.1
       - name: Install SwiftLint
